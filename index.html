@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Warzone: Tactical FPS // 現代戰術射擊</title>
   <style>
     * {
@@ -11,6 +11,7 @@
       box-sizing: border-box;
       user-select: none;
       -webkit-user-select: none;
+      -webkit-touch-callout: none;
     }
     body, html {
       width: 100%;
@@ -19,6 +20,7 @@
       overflow: hidden;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       color: #fff;
+      touch-action: none;
     }
     #game-container {
       position: relative;
@@ -26,6 +28,7 @@
       height: 100vh;
       background: #000;
       overflow: hidden;
+      touch-action: none;
     }
     #canvas3d {
       width: 100%;
@@ -915,6 +918,300 @@
       background: rgba(255, 255, 255, 0.22);
       border-color: #fff;
     }
+
+    /* ====================================================
+       MOBILE & IPAD TOUCH CONTROLS
+       ==================================================== */
+    #mobile-controls {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 40;
+      display: none;
+    }
+
+    /* Left Joystick Zone */
+    #joystick-zone {
+      position: absolute;
+      bottom: 25px;
+      left: 25px;
+      width: 160px;
+      height: 160px;
+      pointer-events: auto;
+      touch-action: none;
+      z-index: 45;
+    }
+    .joystick-base {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(0, 255, 170, 0.08) 0%, rgba(5, 18, 28, 0.55) 80%);
+      border: 2px solid rgba(0, 255, 170, 0.4);
+      box-shadow: 0 0 16px rgba(0, 255, 170, 0.2), inset 0 0 15px rgba(0, 255, 170, 0.1);
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .joystick-knob {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #00ffcc, #008855);
+      border: 2px solid #ffffff;
+      box-shadow: 0 0 12px rgba(0, 255, 200, 0.7);
+      position: absolute;
+      pointer-events: none;
+      transform: translate(0px, 0px);
+      transition: transform 0.04s ease-out;
+    }
+    .joystick-sprint-indicator {
+      position: absolute;
+      top: -20px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      color: rgba(0, 255, 170, 0.85);
+      text-transform: uppercase;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+
+    /* Right Touch Aim Drag Zone */
+    #touch-aim-zone {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 62%;
+      height: 100%;
+      pointer-events: auto;
+      touch-action: none;
+      z-index: 41;
+    }
+
+    /* Action Buttons Cluster (Bottom Right) */
+    .mobile-btn-cluster {
+      position: absolute;
+      bottom: 22px;
+      right: 22px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 12px;
+      pointer-events: auto;
+      z-index: 46;
+    }
+    .mobile-btn-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .m-btn {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background: rgba(10, 20, 32, 0.72);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1.5px solid rgba(0, 255, 170, 0.45);
+      color: #fff;
+      border-radius: 50%;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: none;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.55), inset 0 0 10px rgba(0, 255, 170, 0.15);
+      transition: transform 0.08s, background-color 0.1s, border-color 0.1s;
+    }
+    .m-btn:active, .m-btn.active {
+      transform: scale(0.92);
+      background: rgba(0, 255, 170, 0.38);
+      border-color: #00ffaa;
+      box-shadow: 0 0 20px rgba(0, 255, 170, 0.7);
+    }
+    .m-btn-icon {
+      font-size: 18px;
+      line-height: 1;
+      pointer-events: none;
+    }
+    .m-btn-label {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      margin-top: 2px;
+      color: #b0e5d8;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+
+    /* Primary Fire Button */
+    .m-btn-fire {
+      width: 76px;
+      height: 76px;
+      border: 2px solid rgba(255, 80, 80, 0.85);
+      background: radial-gradient(circle, rgba(255, 70, 70, 0.4) 0%, rgba(36, 8, 8, 0.8) 100%);
+      box-shadow: 0 0 20px rgba(255, 50, 50, 0.5);
+    }
+    .m-btn-fire:active, .m-btn-fire.active {
+      background: radial-gradient(circle, rgba(255, 80, 80, 0.75) 0%, rgba(255, 30, 30, 0.9) 100%);
+      border-color: #ff5566;
+      box-shadow: 0 0 30px rgba(255, 50, 50, 0.95);
+      transform: scale(0.92);
+    }
+
+    .m-btn-med {
+      width: 52px;
+      height: 52px;
+    }
+    .m-btn-sm {
+      width: 44px;
+      height: 44px;
+    }
+    .m-btn-sm .m-btn-icon { font-size: 16px; }
+    .m-btn-sm .m-btn-label { font-size: 8px; }
+
+    /* Top Right Floating Mobile Utility Bar */
+    .mobile-top-bar {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      pointer-events: auto;
+      z-index: 46;
+    }
+    .m-btn-util {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      background: rgba(12, 22, 34, 0.8);
+      border: 1.5px solid rgba(255, 255, 255, 0.25);
+    }
+
+    /* Orientation Hint Overlay */
+    #orientation-warning {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(3, 7, 12, 0.97);
+      z-index: 1000;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 30px;
+    }
+    .orient-icon {
+      font-size: 56px;
+      margin-bottom: 20px;
+      animation: rotatePhone 2.2s ease-in-out infinite alternate;
+    }
+    @keyframes rotatePhone {
+      0% { transform: rotate(0deg); }
+      50% { transform: rotate(-90deg); }
+      100% { transform: rotate(-90deg); }
+    }
+    .orient-title {
+      font-size: 22px;
+      font-weight: 800;
+      color: #00ffaa;
+      letter-spacing: 2px;
+      margin-bottom: 10px;
+    }
+    .orient-desc {
+      font-size: 15px;
+      color: #a0c4dc;
+      line-height: 1.6;
+      max-width: 340px;
+    }
+
+    @media (orientation: portrait) and (max-width: 1024px) {
+      #orientation-warning {
+        display: flex;
+      }
+    }
+
+    /* Mobile mode layout adaptations (iPad & Smartphones) */
+    .touch-device #hud {
+      padding: 12px 16px;
+      pointer-events: none;
+    }
+    .touch-device .player-status {
+      position: absolute;
+      top: 135px;
+      left: 18px;
+      transform-origin: top left;
+      scale: 0.92;
+      pointer-events: auto;
+    }
+    .touch-device .weapon-status {
+      position: absolute;
+      bottom: 105px;
+      right: 18px;
+      transform-origin: bottom right;
+      scale: 0.88;
+      pointer-events: auto;
+    }
+    .touch-device .weapon-hint {
+      display: none;
+    }
+
+    @media (max-width: 820px) {
+      #radar-container {
+        width: 100px;
+        height: 100px;
+      }
+      .hp-wrapper {
+        padding: 6px 12px;
+        gap: 8px;
+      }
+      .hp-bar-outer {
+        width: 140px;
+        height: 11px;
+      }
+      .weapon-status {
+        padding: 8px 12px;
+        min-width: 170px;
+      }
+      .weap-tab {
+        padding: 2px 5px;
+        font-size: 10px;
+      }
+      #gun-name {
+        font-size: 14px;
+      }
+      .ammo-current {
+        font-size: 26px;
+      }
+      .ammo-reserve {
+        font-size: 14px;
+      }
+      .modal-box {
+        max-width: 95vw;
+        max-height: 94vh;
+        padding: 16px 20px;
+        overflow-y: auto;
+      }
+      .diff-grid, .mode-select-grid, .time-grid {
+        gap: 6px;
+      }
+      .controls-grid {
+        font-size: 11px;
+        padding: 10px;
+        gap: 6px 10px;
+      }
+    }
   </style>
 
   <!-- Import Three.js via CDN -->
@@ -944,6 +1241,79 @@
     <div id="hitmarker"></div>
     <div class="reload-prompt" id="reload-prompt">按 [R] 裝填彈藥</div>
     <div class="env-toast" id="env-toast">戰場環境：中午 (NOON)</div>
+
+    <!-- Mobile & iPad Virtual Touch Controls Overlay -->
+    <div id="mobile-controls">
+      <!-- Left Joystick Touch Area -->
+      <div id="joystick-zone">
+        <div class="joystick-base" id="joystick-base">
+          <div class="joystick-sprint-indicator">▲ SPRINT</div>
+          <div class="joystick-knob" id="joystick-knob"></div>
+        </div>
+      </div>
+
+      <!-- Right Touch Aim Drag Zone -->
+      <div id="touch-aim-zone"></div>
+
+      <!-- Top Right Floating Action Bar (Pause, Perspective, Laser) -->
+      <div class="mobile-top-bar">
+        <button class="m-btn m-btn-util" id="m-btn-laser" title="開關雷射瞄準線">
+          <span class="m-btn-icon" style="font-size:16px;">⚡</span>
+        </button>
+        <button class="m-btn m-btn-util" id="m-btn-view" title="切換第一/第三人稱視角">
+          <span class="m-btn-icon" style="font-size:16px;">👁️</span>
+        </button>
+        <button class="m-btn m-btn-util" id="m-btn-pause" title="暫停遊戲">
+          <span class="m-btn-icon" style="font-size:16px;">⏸️</span>
+        </button>
+      </div>
+
+      <!-- Bottom Right Tactical Action Cluster -->
+      <div class="mobile-btn-cluster">
+        <!-- Row 1: Grenade & Quick Weapon Switch & Reload -->
+        <div class="mobile-btn-row">
+          <button class="m-btn m-btn-sm" id="m-btn-grenade" title="投擲手榴彈">
+            <span class="m-btn-icon">💣</span>
+            <span class="m-btn-label">手榴彈</span>
+          </button>
+          <button class="m-btn m-btn-sm" id="m-btn-weapon" title="切換武器">
+            <span class="m-btn-icon">🔄</span>
+            <span class="m-btn-label">武器</span>
+          </button>
+          <button class="m-btn m-btn-med" id="m-btn-reload" title="填裝彈藥">
+            <span class="m-btn-icon">⚡</span>
+            <span class="m-btn-label">換彈</span>
+          </button>
+        </div>
+
+        <!-- Row 2: Stance & Jump & ADS & Primary Fire -->
+        <div class="mobile-btn-row">
+          <button class="m-btn m-btn-med" id="m-btn-stance" title="姿態切換 (站立/蹲姿/伏進)">
+            <span class="m-btn-icon" id="m-stance-icon">🚶</span>
+            <span class="m-btn-label" id="m-stance-label">姿態</span>
+          </button>
+          <button class="m-btn m-btn-med" id="m-btn-jump" title="戰術跳躍 / 站立">
+            <span class="m-btn-icon">⬆️</span>
+            <span class="m-btn-label">跳躍</span>
+          </button>
+          <button class="m-btn m-btn-med" id="m-btn-ads" title="機瞄瞄準 (ADS)">
+            <span class="m-btn-icon">🎯</span>
+            <span class="m-btn-label">機瞄</span>
+          </button>
+          <button class="m-btn m-btn-fire" id="m-btn-fire" title="射擊 / 揮擊">
+            <span class="m-btn-icon" style="font-size: 26px;">🔥</span>
+            <span class="m-btn-label" style="font-size:10px; color:#ffdddd;">開火</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile Orientation Warning (Portrait to Landscape) -->
+    <div id="orientation-warning">
+      <div class="orient-icon">🔄📱</div>
+      <div class="orient-title">請旋轉至橫向螢幕</div>
+      <div class="orient-desc">為了提供最佳的戰術射擊視野與觸控操作體驗，請將您的 iPad 或手機轉為橫向模式 (Landscape)。</div>
+    </div>
 
     <!-- Tactical HUD -->
     <div id="hud">
@@ -1081,21 +1451,21 @@
           </button>
         </div>
 
-        <div class="controls-grid">
-          <div><span class="key-badge">W</span><span class="key-badge">A</span><span class="key-badge">S</span><span class="key-badge">D</span> 移動</div>
-          <div><span class="key-badge">滑鼠移動</span> 視角瞄準</div>
-          <div><span class="key-badge">滑鼠左鍵</span> 射擊開火 / 光劍揮斬</div>
-          <div><span class="key-badge">滑鼠右鍵</span> 機瞄瞄準 (ADS)</div>
-          <div><span class="key-badge">Shift</span> 衝刺奔跑 (伏進自動起立)</div>
-          <div><span class="key-badge">Space</span> 恢復站姿 / 戰術跳躍</div>
-          <div><span class="key-badge">C</span> 戰術蹲姿 (CROUCH)</div>
-          <div><span class="key-badge">Z</span> 戰術伏進 (PRONE 匍匐前進)</div>
-          <div><span class="key-badge">1</span><span class="key-badge">2</span><span class="key-badge">3</span><span class="key-badge">4</span> / <span class="key-badge">滾輪</span> 武器 (步槍/爆能/火箭筒/光劍)</div>
-          <div><span class="key-badge">4</span> 離子光劍 (水果忍者斬線分解)</div>
-          <div><span class="key-badge">G</span> 投擲手榴彈 | <span class="key-badge">R</span> 裝填</div>
-          <div><span class="key-badge">V</span> 第一 / 第三人稱視角切換</div>
-          <div style="grid-column: span 2; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 6px; color: #00e1ff;">
-            <span class="key-badge" style="border-color: #00e1ff; color: #00e1ff;">T</span> 切換天候背景 (中午 / 白天 / 晚上) | [H] 開關雷射輔助線 | 深化縱深三大戰區
+        <div class="controls-grid" id="controls-hint-grid">
+          <div><span class="key-badge">WASD / 虛擬搖桿</span> 移動前進後退</div>
+          <div><span class="key-badge">滑鼠 / 右側觸控</span> 旋轉視角與瞄準</div>
+          <div><span class="key-badge">左鍵 / 🔥按鈕</span> 射擊開火 / 揮斬</div>
+          <div><span class="key-badge">右鍵 / 🎯按鈕</span> 機瞄瞄準 (ADS)</div>
+          <div><span class="key-badge">Shift / 搖桿推滿</span> 衝刺奔跑</div>
+          <div><span class="key-badge">Space / ⬆️按鈕</span> 戰術跳躍 / 恢復站姿</div>
+          <div><span class="key-badge">C / Z / 🚶按鈕</span> 蹲姿 / 伏進匍匐切換</div>
+          <div><span class="key-badge">1~4 / 🔄按鈕</span> 武器切換 (步槍/爆能/火箭/光劍)</div>
+          <div><span class="key-badge">G / 💣按鈕</span> 投擲高爆手榴彈</div>
+          <div><span class="key-badge">R / ⚡按鈕</span> 戰術彈藥裝填</div>
+          <div><span class="key-badge">V / 👁️按鈕</span> FPS / TPS 視角切換</div>
+          <div><span class="key-badge">T / ☀️按鈕</span> 天候時間循環 (午/日/夜)</div>
+          <div style="grid-column: span 2; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 8px; color: #00e1ff; font-weight: bold;">
+            <span class="key-badge" style="border-color: #00e1ff; color: #00e1ff;">iPad / 手機支援</span> 支援全螢幕觸控、虛擬搖桿、光劍滑動斬切與多點觸控！
           </div>
         </div>
 
@@ -1175,6 +1545,16 @@
     import * as THREE from 'three';
 
     // ----------------------------------------------------
+    // MOBILE / IPAD TOUCH DETECTION & INITIALIZATION
+    // ----------------------------------------------------
+    const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (window.matchMedia && window.matchMedia('(pointer: coarse)').matches) || /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    if (isTouchDevice) {
+      document.body.classList.add('touch-device');
+      const mc = document.getElementById('mobile-controls');
+      if (mc) mc.style.display = 'block';
+    }
+
+    // ----------------------------------------------------
     // PROCEDURAL AAA SOUND ENGINE (Web Audio API)
     // ----------------------------------------------------
     class ProceduralAudio {
@@ -1185,9 +1565,17 @@
       }
 
       init() {
-        if (this.inited) return;
+        if (this.inited) {
+          if (this.ctx && this.ctx.state === 'suspended') {
+            this.ctx.resume().catch(() => {});
+          }
+          return;
+        }
         const AudioContext = window.AudioContext || window.webkitAudioContext;
         this.ctx = new AudioContext();
+        if (this.ctx.state === 'suspended') {
+          this.ctx.resume().catch(() => {});
+        }
         this.masterGain = this.ctx.createGain();
         this.masterGain.gain.setValueAtTime(0.85, this.ctx.currentTime);
         this.masterGain.connect(this.ctx.destination);
@@ -2022,6 +2410,12 @@
       renderer.setSize(w, h, false);
     }
     window.addEventListener('resize', resize);
+    window.addEventListener('orientationchange', () => {
+      setTimeout(() => {
+        resize();
+        if (typeof resizeSlashCanvas === 'function') resizeSlashCanvas();
+      }, 150);
+    });
     resize();
 
     // ----------------------------------------------------
@@ -4875,6 +5269,12 @@
         this.recoilPitch = 0;
         this.walkTimer = 0;
 
+        // Mobile touch controls state
+        this.touchMoveX = 0;
+        this.touchMoveY = 0;
+        this.touchSprint = false;
+        this.touchJump = false;
+
         this.saberSwingTimer = 0;
         this.saberSwingIndex = 0;
 
@@ -4886,6 +5286,22 @@
         this.stance = newStance;
         audio.playStanceChange();
         updateStanceHUD(this.stance);
+
+        // Update mobile stance icon
+        const icon = document.getElementById('m-stance-icon');
+        const label = document.getElementById('m-stance-label');
+        if (icon && label) {
+          if (this.stance === 'STAND') {
+            icon.innerText = '🚶';
+            label.innerText = '站立';
+          } else if (this.stance === 'CROUCH') {
+            icon.innerText = '🧎';
+            label.innerText = '蹲姿';
+          } else {
+            icon.innerText = '🛌';
+            label.innerText = '伏進';
+          }
+        }
       }
 
       toggleCrouch() {
@@ -4919,20 +5335,26 @@
       }
 
       initControls() {
+        // Unlock Web Audio on first touch anywhere
+        window.addEventListener('touchstart', () => {
+          audio.init();
+        }, { passive: true, once: true });
+
         container.addEventListener('click', () => {
-          if (gameState === 'PLAYING') {
-            container.requestPointerLock();
+          if (!isTouchDevice && gameState === 'PLAYING') {
+            try { container.requestPointerLock(); } catch(e) {}
           }
         });
 
         document.addEventListener('pointerlockchange', () => {
-          if (document.pointerLockElement !== container && gameState === 'PLAYING') {
+          if (!isTouchDevice && document.pointerLockElement !== container && gameState === 'PLAYING') {
             pauseGame();
           }
         });
 
         window.addEventListener('mousemove', (e) => {
-          if (document.pointerLockElement !== container || gameState !== 'PLAYING') return;
+          if (!isTouchDevice && document.pointerLockElement !== container) return;
+          if (gameState !== 'PLAYING') return;
 
           const sensitivity = this.isADS ? 0.0012 : 0.0022;
           this.yaw -= e.movementX * sensitivity;
@@ -5032,6 +5454,296 @@
         window.addEventListener('keyup', (e) => {
           this.keys[e.code] = false;
         });
+
+        // ------------------------------------------------
+        // VIRTUAL JOYSTICK (Mobile & iPad Movement)
+        // ------------------------------------------------
+        const joystickZone = document.getElementById('joystick-zone');
+        const joystickBase = document.getElementById('joystick-base');
+        const joystickKnob = document.getElementById('joystick-knob');
+        let joystickTouchId = null;
+        let joystickCenter = { x: 0, y: 0 };
+        const joystickRadius = 55;
+
+        const updateJoystickPos = (touch) => {
+          const dx = touch.clientX - joystickCenter.x;
+          const dy = touch.clientY - joystickCenter.y;
+          const dist = Math.hypot(dx, dy);
+          const clampedDist = Math.min(dist, joystickRadius);
+          const angle = Math.atan2(dy, dx);
+
+          const knobX = Math.cos(angle) * clampedDist;
+          const knobY = Math.sin(angle) * clampedDist;
+          if (joystickKnob) {
+            joystickKnob.style.transform = `translate(${knobX}px, ${knobY}px)`;
+          }
+
+          this.touchMoveX = knobX / joystickRadius;
+          this.touchMoveY = knobY / joystickRadius;
+
+          // Dragging up and past 72% distance triggers sprinting
+          this.touchSprint = (clampedDist > joystickRadius * 0.72 && this.touchMoveY < -0.3);
+        };
+
+        const resetJoystick = () => {
+          joystickTouchId = null;
+          if (joystickKnob) joystickKnob.style.transform = 'translate(0px, 0px)';
+          this.touchMoveX = 0;
+          this.touchMoveY = 0;
+          this.touchSprint = false;
+        };
+
+        if (joystickZone && joystickBase) {
+          joystickZone.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            audio.init();
+            if (joystickTouchId === null && e.changedTouches.length > 0) {
+              const touch = e.changedTouches[0];
+              joystickTouchId = touch.identifier;
+              const rect = joystickBase.getBoundingClientRect();
+              joystickCenter = {
+                x: rect.left + rect.width / 2,
+                y: rect.top + rect.height / 2
+              };
+              updateJoystickPos(touch);
+            }
+          }, { passive: false });
+
+          window.addEventListener('touchmove', (e) => {
+            if (joystickTouchId !== null) {
+              for (let i = 0; i < e.changedTouches.length; i++) {
+                if (e.changedTouches[i].identifier === joystickTouchId) {
+                  updateJoystickPos(e.changedTouches[i]);
+                  break;
+                }
+              }
+            }
+          }, { passive: false });
+
+          const endJoystick = (e) => {
+            if (joystickTouchId !== null) {
+              for (let i = 0; i < e.changedTouches.length; i++) {
+                if (e.changedTouches[i].identifier === joystickTouchId) {
+                  resetJoystick();
+                  break;
+                }
+              }
+            }
+          };
+          window.addEventListener('touchend', endJoystick, { passive: true });
+          window.addEventListener('touchcancel', endJoystick, { passive: true });
+        }
+
+        // ------------------------------------------------
+        // TOUCH AIM & LOOK ZONE (Right Screen Drag)
+        // ------------------------------------------------
+        const aimZone = document.getElementById('touch-aim-zone');
+        let lookTouchId = null;
+        let lastLookX = 0;
+        let lastLookY = 0;
+
+        if (aimZone) {
+          aimZone.addEventListener('touchstart', (e) => {
+            if (gameState !== 'PLAYING') return;
+            audio.init();
+            for (let i = 0; i < e.changedTouches.length; i++) {
+              const touch = e.changedTouches[i];
+              if (touch.identifier !== joystickTouchId && lookTouchId === null) {
+                lookTouchId = touch.identifier;
+                lastLookX = touch.clientX;
+                lastLookY = touch.clientY;
+                break;
+              }
+            }
+          }, { passive: true });
+
+          window.addEventListener('touchmove', (e) => {
+            if (gameState !== 'PLAYING' || lookTouchId === null) return;
+            for (let i = 0; i < e.changedTouches.length; i++) {
+              const touch = e.changedTouches[i];
+              if (touch.identifier === lookTouchId) {
+                const deltaX = touch.clientX - lastLookX;
+                const deltaY = touch.clientY - lastLookY;
+
+                const touchSensitivity = this.isADS ? 0.0035 : 0.0062;
+                this.yaw -= deltaX * touchSensitivity;
+                this.pitch -= deltaY * touchSensitivity;
+                this.pitch = Math.max(-Math.PI / 2.1, Math.min(Math.PI / 2.1, this.pitch));
+
+                // Lightsaber touch slash trail
+                if (this.currentWeaponId === 'saber') {
+                  triggerFruitNinjaSlash(lastLookX, lastLookY, touch.clientX, touch.clientY, '#00ffaa');
+                }
+
+                lastLookX = touch.clientX;
+                lastLookY = touch.clientY;
+                break;
+              }
+            }
+          }, { passive: true });
+
+          const stopLook = (e) => {
+            if (lookTouchId === null) return;
+            for (let i = 0; i < e.changedTouches.length; i++) {
+              if (e.changedTouches[i].identifier === lookTouchId) {
+                lookTouchId = null;
+                break;
+              }
+            }
+          };
+          window.addEventListener('touchend', stopLook, { passive: true });
+          window.addEventListener('touchcancel', stopLook, { passive: true });
+        }
+
+        // ------------------------------------------------
+        // MOBILE ACTION BUTTONS
+        // ------------------------------------------------
+        // Fire Button
+        const btnFire = document.getElementById('m-btn-fire');
+        if (btnFire) {
+          const startFiring = (e) => {
+            e.preventDefault();
+            if (gameState !== 'PLAYING') return;
+            audio.init();
+            this.isFiring = true;
+            btnFire.classList.add('active');
+          };
+          const stopFiring = (e) => {
+            e.preventDefault();
+            this.isFiring = false;
+            btnFire.classList.remove('active');
+          };
+          btnFire.addEventListener('touchstart', startFiring, { passive: false });
+          btnFire.addEventListener('touchend', stopFiring, { passive: false });
+          btnFire.addEventListener('touchcancel', stopFiring, { passive: false });
+          btnFire.addEventListener('mousedown', startFiring);
+          btnFire.addEventListener('mouseup', stopFiring);
+        }
+
+        // ADS Button
+        const btnAds = document.getElementById('m-btn-ads');
+        if (btnAds) {
+          const toggleAds = (e) => {
+            e.preventDefault();
+            if (gameState !== 'PLAYING') return;
+            this.isADS = !this.isADS;
+            const crosshair = document.getElementById('crosshair-container');
+            if (this.isADS) {
+              btnAds.classList.add('active');
+              if (crosshair) crosshair.classList.add('aiming');
+            } else {
+              btnAds.classList.remove('active');
+              if (crosshair) crosshair.classList.remove('aiming');
+            }
+          };
+          btnAds.addEventListener('touchstart', toggleAds, { passive: false });
+          btnAds.addEventListener('click', toggleAds);
+        }
+
+        // Jump Button
+        const btnJump = document.getElementById('m-btn-jump');
+        if (btnJump) {
+          const doJump = (e) => {
+            e.preventDefault();
+            if (gameState !== 'PLAYING') return;
+            this.touchJump = true;
+          };
+          btnJump.addEventListener('touchstart', doJump, { passive: false });
+          btnJump.addEventListener('click', doJump);
+        }
+
+        // Stance Button
+        const btnStance = document.getElementById('m-btn-stance');
+        if (btnStance) {
+          const doStance = (e) => {
+            e.preventDefault();
+            if (gameState !== 'PLAYING') return;
+            this.cycleStance();
+          };
+          btnStance.addEventListener('touchstart', doStance, { passive: false });
+          btnStance.addEventListener('click', doStance);
+        }
+
+        // Reload Button
+        const btnReload = document.getElementById('m-btn-reload');
+        if (btnReload) {
+          const doReload = (e) => {
+            e.preventDefault();
+            if (gameState !== 'PLAYING') return;
+            this.reload();
+          };
+          btnReload.addEventListener('touchstart', doReload, { passive: false });
+          btnReload.addEventListener('click', doReload);
+        }
+
+        // Grenade Button
+        const btnGrenade = document.getElementById('m-btn-grenade');
+        if (btnGrenade) {
+          const doGrenade = (e) => {
+            e.preventDefault();
+            if (gameState !== 'PLAYING') return;
+            this.throwGrenade();
+          };
+          btnGrenade.addEventListener('touchstart', doGrenade, { passive: false });
+          btnGrenade.addEventListener('click', doGrenade);
+        }
+
+        // Weapon Quick Switch Button
+        const btnWeapon = document.getElementById('m-btn-weapon');
+        if (btnWeapon) {
+          const doSwitchWeapon = (e) => {
+            e.preventDefault();
+            if (gameState !== 'PLAYING') return;
+            const order = ['rifle', 'blaster', 'rocket', 'saber'];
+            const idx = (order.indexOf(this.currentWeaponId) + 1) % order.length;
+            this.switchWeapon(order[idx]);
+          };
+          btnWeapon.addEventListener('touchstart', doSwitchWeapon, { passive: false });
+          btnWeapon.addEventListener('click', doSwitchWeapon);
+        }
+
+        // Perspective Button
+        const btnView = document.getElementById('m-btn-view');
+        if (btnView) {
+          const doView = (e) => {
+            e.preventDefault();
+            if (gameState !== 'PLAYING') return;
+            this.togglePerspective();
+          };
+          btnView.addEventListener('touchstart', doView, { passive: false });
+          btnView.addEventListener('click', doView);
+        }
+
+        // Laser Guide Button
+        const btnLaser = document.getElementById('m-btn-laser');
+        if (btnLaser) {
+          const doLaser = (e) => {
+            e.preventDefault();
+            if (gameState !== 'PLAYING') return;
+            this.showTrajectoryLaser = !this.showTrajectoryLaser;
+            btnLaser.classList.toggle('active', this.showTrajectoryLaser);
+            const laserState = document.getElementById('laser-hud-state');
+            if (laserState) {
+              laserState.innerText = this.showTrajectoryLaser ? '開啟' : '關閉';
+              laserState.style.color = this.showTrajectoryLaser ? '#00ffaa' : '#ff4444';
+            }
+          };
+          btnLaser.addEventListener('touchstart', doLaser, { passive: false });
+          btnLaser.addEventListener('click', doLaser);
+        }
+
+        // Mobile Pause Button
+        const btnPause = document.getElementById('m-btn-pause');
+        if (btnPause) {
+          const doPause = (e) => {
+            e.preventDefault();
+            if (gameState === 'PLAYING') {
+              pauseGame();
+            }
+          };
+          btnPause.addEventListener('touchstart', doPause, { passive: false });
+          btnPause.addEventListener('click', doPause);
+        }
 
         // UI Tabs & Button clicks
         const tabRifle = document.getElementById('tab-rifle');
@@ -5220,12 +5932,20 @@
         if (this.keys['KeyS']) moveVector.z += 1;
         if (this.keys['KeyA']) moveVector.x -= 1;
         if (this.keys['KeyD']) moveVector.x += 1;
-        moveVector.normalize();
+
+        // Virtual joystick touch movement
+        if (Math.abs(this.touchMoveX) > 0.05) moveVector.x += this.touchMoveX;
+        if (Math.abs(this.touchMoveY) > 0.05) moveVector.z += this.touchMoveY;
+
+        if (moveVector.lengthSq() > 1.0) {
+          moveVector.normalize();
+        }
 
         const isMoving = (moveVector.lengthSq() > 0.01);
 
-        // Sprinting: Only allowed in STAND posture; sprint recovers stance from crouch/prone
-        if (this.keys['ShiftLeft'] && moveVector.z < 0 && !this.isADS) {
+        // Sprinting: Only allowed in STAND posture; keyboard Shift or joystick full push
+        const wantSprint = (this.keys['ShiftLeft'] || this.touchSprint) && moveVector.z < -0.1 && !this.isADS;
+        if (wantSprint) {
           if (this.stance !== 'STAND' && isMoving) {
             this.setStance('STAND');
           }
@@ -5243,13 +5963,15 @@
         this.velocity.x = THREE.MathUtils.lerp(this.velocity.x, moveVector.x * speed, 12 * delta);
         this.velocity.z = THREE.MathUtils.lerp(this.velocity.z, moveVector.z * speed, 12 * delta);
 
-        // Space: Recover posture to STAND if in crouch/prone, and jump!
-        if (this.keys['Space'] && this.position.y <= targetEyeHeight + 0.08) {
+        // Space or Touch Jump: Recover posture to STAND if in crouch/prone, and jump!
+        const wantJump = (this.keys['Space'] || this.touchJump);
+        if (wantJump && this.position.y <= targetEyeHeight + 0.08) {
           if (this.stance !== 'STAND') {
             this.setStance('STAND');
           }
           this.velocity.y = 5.5;
         }
+        this.touchJump = false;
         this.velocity.y -= 18.0 * delta;
 
         const nextX = this.position.x + this.velocity.x * delta;
@@ -5777,13 +6499,17 @@
       }
 
       updateHUD();
-      container.requestPointerLock();
+      if (!isTouchDevice && typeof container.requestPointerLock === 'function') {
+        try { container.requestPointerLock(); } catch (e) {}
+      }
     }
 
     function pauseGame() {
       if (gameState !== 'PLAYING') return;
       gameState = 'PAUSED';
-      document.exitPointerLock();
+      if (document.pointerLockElement) {
+        try { document.exitPointerLock(); } catch (e) {}
+      }
       document.getElementById('pause-modal').style.display = 'flex';
     }
 
@@ -5791,19 +6517,25 @@
       if (gameState !== 'PAUSED') return;
       gameState = 'PLAYING';
       document.getElementById('pause-modal').style.display = 'none';
-      container.requestPointerLock();
+      if (!isTouchDevice && typeof container.requestPointerLock === 'function') {
+        try { container.requestPointerLock(); } catch (e) {}
+      }
     }
 
     function triggerGameOver() {
       gameState = 'GAMEOVER';
-      document.exitPointerLock();
+      if (document.pointerLockElement) {
+        try { document.exitPointerLock(); } catch (e) {}
+      }
       document.getElementById('gameover-modal').style.display = 'flex';
     }
 
     function triggerVictory() {
       if (currentGameMode === 'practice') return; // Practice mode is continuous sandbox
       gameState = 'VICTORY';
-      document.exitPointerLock();
+      if (document.pointerLockElement) {
+        try { document.exitPointerLock(); } catch (e) {}
+      }
       audio.playVictoryFanfare();
       const elapsedSec = ((performance.now() - missionStartTime) / 1000).toFixed(1);
       document.getElementById('victory-stats').innerHTML = `
