@@ -5588,11 +5588,11 @@
             const dz = playerPos.z - e.mesh.root.position.z;
             const distXZ = Math.hypot(dx, dz);
 
-            // Close-quarters standoff threshold: enemies advance all the way into 0.82m face-to-face range!
-            const closeCombatStandoff = 0.82;
+            // Close-quarters standoff threshold: enemies advance all the way into 0.58m face-to-face range!
+            const closeCombatStandoff = 0.58;
             if (distXZ > closeCombatStandoff) {
               if (e.mesh.mixer) e.mesh.mixer.timeScale = 1.35;
-              const advSpeed = (diff.advanceSpeed || 2.0) * (currentDifficulty === 'hard' ? 1.15 : 1.0);
+              const advSpeed = (diff.advanceSpeed || 2.4) * (currentDifficulty === 'hard' ? 1.25 : 1.1);
               const dirX = dx / distXZ;
               const dirZ = dz / distXZ;
 
@@ -5623,8 +5623,8 @@
               }
 
               // Maintain minimum separation cushion (prevent clipping inside player)
-              if (distXZ < 0.78 && distXZ > 0.001) {
-                const push = (0.78 - distXZ);
+              if (distXZ < 0.54 && distXZ > 0.001) {
+                const push = (0.54 - distXZ);
                 e.mesh.root.position.x -= (dx / distXZ) * push;
                 e.mesh.root.position.z -= (dz / distXZ) * push;
               }
@@ -6906,6 +6906,7 @@
             } else {
               if (crosshair) crosshair.classList.remove('aiming');
               this.userAdjustedScope = false;
+              this.scopeZoomFov = null;
             }
           }
         });
@@ -6920,6 +6921,7 @@
               const crosshair = document.getElementById('crosshair-container');
               if (crosshair) crosshair.classList.remove('aiming');
               this.userAdjustedScope = false;
+              this.scopeZoomFov = null;
             }
           }
         });
@@ -6929,19 +6931,19 @@
           if (gameState !== 'PLAYING') return;
           const isScopedWeapon = (this.currentWeaponId === 'rifle' || this.currentWeaponId === 'blaster');
           if (this.isADS && isScopedWeapon) {
-            if (!this.scopeZoomFov) this.scopeZoomFov = 2.4;
+            if (!this.scopeZoomFov) this.scopeZoomFov = this.currentEffectiveScopeFov || 1.2;
             this.userAdjustedScope = true;
             if (e.deltaY < 0) {
-              // 滾輪往前推：極致拉近特寫，最小至 0.8° (相當於 81.2X 超高倍率，整張臉佔滿瞄準鏡)
-              this.scopeZoomFov = Math.max(0.8, this.scopeZoomFov * 0.82);
+              // 滾輪往前推：極限放大拉近至 0.20° (相當於 325X 超高倍率，整張臉佔滿瞄準鏡大圓)
+              this.scopeZoomFov = Math.max(0.20, this.scopeZoomFov * 0.82);
             } else {
-              // 滾輪往後推：廣角拉遠，最大至 24.0° (適合近身快速鎖定整張臉)
+              // 滾輪往後推：廣角拉遠，最大至 24.0°
               this.scopeZoomFov = Math.min(24.0, this.scopeZoomFov * 1.22);
             }
             const scopeTag = document.getElementById('scope-tag');
             if (scopeTag) {
               const mag = (65 / this.scopeZoomFov).toFixed(1);
-              const tagNote = this.scopeZoomFov <= 1.2 ? '整張臉極限特寫' : (this.scopeZoomFov <= 4.0 ? '高倍率狙擊' : '近身/廣角特寫');
+              const tagNote = this.scopeZoomFov <= 0.6 ? '極限大圓特寫' : (this.scopeZoomFov <= 1.5 ? '大圓臉部滿鏡' : '廣角特寫');
               scopeTag.innerText = `OPTICAL ${mag}X // SNIPER SCOPE (${tagNote})`;
             }
             return;
@@ -7199,6 +7201,7 @@
               btnAds.classList.remove('active');
               if (crosshair) crosshair.classList.remove('aiming');
               this.userAdjustedScope = false;
+              this.scopeZoomFov = null;
             }
           };
           btnAds.addEventListener('touchstart', toggleAds, { passive: false });
@@ -7580,8 +7583,8 @@
           }
         }
 
-        // 實體防穿模碰撞體積：玩家近身時緊貼敵軍臉部 (0.78m)，絕不穿模進體內，呈現極致近身感
-        const MIN_ENEMY_DIST = 0.78;
+        // 實體防穿模碰撞體積：玩家近身時緊貼敵軍臉部 (0.54m)，絕不穿模進體內，呈現極致近身感
+        const MIN_ENEMY_DIST = 0.54;
         if (typeof enemyManager !== 'undefined' && enemyManager.enemies) {
           for (const e of enemyManager.enemies) {
             if (!e.alive) continue;
@@ -7727,40 +7730,82 @@
           document.getElementById('crosshair-container').classList.remove('spread');
         }
 
-        // 瞄準鏡極限拉近放大 (High-Magnification Optical Scope Zoom & Close-Combat Face Framing)
-        let effectiveScopedFov = this.scopeZoomFov || 2.4;
+        // ----------------------------------------------------
+        // 瞄準鏡大圓滿鏡特寫 (Big Circle Scope Auto-Framing) & 近身壓迫感聚焦
+        // ----------------------------------------------------
+        let targetEnemyDist = null;
+        let closestFrontDist = 999;
 
-        // 如果玩家未手動滾輪鎖定，且正面近距離有敵軍 (< 2.5m)，自適應近身特寫倍率 (~16°~22°)，確保近身開鏡整張臉剛好佔滿瞄準鏡
-        if (!this.userAdjustedScope && typeof enemyManager !== 'undefined' && enemyManager.enemies) {
-          let closestDist = 999;
+        if (typeof enemyManager !== 'undefined' && enemyManager.enemies) {
+          const camPos = camera.position;
           const camDir = new THREE.Vector3();
           camera.getWorldDirection(camDir);
+
+          let bestAimScore = -1;
           for (const e of enemyManager.enemies) {
             if (!e.alive) continue;
-            const toE = e.mesh.root.position.clone().sub(this.position);
-            toE.y = 0;
-            const d = toE.length();
-            if (d < 2.5 && toE.normalize().dot(camDir) > 0.35) {
-              if (d < closestDist) closestDist = d;
+            // 敵軍頭部世界座標
+            const headPos = e.mesh.root.position.clone();
+            headPos.y += (e.mesh.isGlb ? 1.88 : 2.12);
+
+            const toEnemy = headPos.clone().sub(camPos);
+            const dist = toEnemy.length();
+            if (dist < 0.1) continue;
+
+            const toDir = toEnemy.clone().normalize();
+            const dot = toDir.dot(camDir);
+
+            // 正前方近身距離監測 (2.8m 內)
+            if (dist < 2.8 && dot > 0.35) {
+              if (dist < closestFrontDist) closestFrontDist = dist;
             }
-          }
-          if (closestDist < 2.5) {
-            effectiveScopedFov = Math.min(22.0, Math.max(14.0, closestDist * 16.0));
-            const scopeTag = document.getElementById('scope-tag');
-            if (scopeTag) {
-              const mag = (65 / effectiveScopedFov).toFixed(1);
-              scopeTag.innerText = `OPTICAL ${mag}X // SNIPER SCOPE (近身臉部特寫)`;
+
+            // 準心目標鎖定判定 (dot > 0.82)
+            if (dot > 0.82) {
+              const score = (dot * dot) / (1.0 + dist * 0.04);
+              if (score > bestAimScore) {
+                bestAimScore = score;
+                targetEnemyDist = dist;
+              }
             }
           }
         }
 
-        const targetFov = this.isADS ? (isScopedWeapon ? effectiveScopedFov : 28) : 65;
+        // 1. 近身時 (若未開鏡)：敵軍逼近至 2.5m 內時，視角自適應收束至 36°~40°，使敵軍整張臉如大圓般巨大震撼！
+        let baseHipFov = 65;
+        if (closestFrontDist < 2.5) {
+          const proximityT = Math.max(0, Math.min(1, (2.5 - closestFrontDist) / (2.5 - 0.54)));
+          baseHipFov = THREE.MathUtils.lerp(65, 36, proximityT);
+        }
+
+        // 2. 瞄準鏡大圓滿鏡計算：敵軍頭部 (0.32m) 剛好填滿 84vh 大圓圈 (約佔視場 78%)
+        // 公式：autoBigCircleFov = (0.32 / dist) * (180 / (PI * 0.78))
+        let autoBigCircleFov = targetEnemyDist
+          ? Math.max(0.20, Math.min(22.0, (0.32 / targetEnemyDist) * (180 / (Math.PI * 0.78))))
+          : 0.85;
+
+        let effectiveScopedFov = this.userAdjustedScope
+          ? (this.scopeZoomFov || autoBigCircleFov)
+          : autoBigCircleFov;
+        this.currentEffectiveScopeFov = effectiveScopedFov;
+
+        const targetFov = this.isADS
+          ? (isScopedWeapon ? effectiveScopedFov : (closestFrontDist < 2.0 ? 20 : 26))
+          : baseHipFov;
+
         camera.fov = THREE.MathUtils.lerp(camera.fov, targetFov, 16 * delta);
         camera.updateProjectionMatrix();
 
         const scopeOverlay = document.getElementById('scope-overlay');
         if (scopeOverlay) {
           scopeOverlay.classList.toggle('active', this.isADS && isScopedWeapon);
+        }
+
+        const scopeTag = document.getElementById('scope-tag');
+        if (scopeTag && this.isADS && isScopedWeapon) {
+          const mag = (65 / effectiveScopedFov).toFixed(1);
+          const tagNote = effectiveScopedFov <= 0.6 ? '極限大圓特寫' : (effectiveScopedFov <= 1.5 ? '大圓臉部滿鏡' : '近身大圓特寫');
+          scopeTag.innerText = `OPTICAL ${mag}X // SNIPER SCOPE (${tagNote})`;
         }
 
         // Weapon Firing
