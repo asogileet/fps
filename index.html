@@ -1501,7 +1501,7 @@
         <div class="scope-cross-v"></div>
         <div class="scope-center-circle"></div>
         <div class="scope-center-dot"></div>
-        <div class="scope-tag" id="scope-tag">OPTICAL 8.1X // SNIPER SCOPE (滾輪調節倍率)</div>
+        <div class="scope-tag" id="scope-tag">OPTICAL 27.1X // SNIPER SCOPE (滾輪調節特寫)</div>
       </div>
     </div>
 
@@ -5583,21 +5583,30 @@
           }
 
           if (e.state === 'shooting') {
-            // Sidestep / strafe to make hitting enemies dynamic
-            e.mesh.root.position.x += e.patrolDir * delta * 1.35;
-            if (Math.abs(e.mesh.root.position.x) > 9.5) {
-              e.patrolDir *= -1;
-            }
-
             // ADVANCING TACTICAL AI: Enemies actively advance forward towards player's position!
-            const zDiff = playerPos.z - e.mesh.root.position.z;
-            const distZ = Math.abs(zDiff);
-            // Standoff threshold: enemies advance until within 3.2m close combat range (~50% screen height)
-            if (distZ > 3.2) {
+            const dx = playerPos.x - e.mesh.root.position.x;
+            const dz = playerPos.z - e.mesh.root.position.z;
+            const distXZ = Math.hypot(dx, dz);
+
+            // Close-quarters standoff threshold: enemies advance all the way into 0.82m face-to-face range!
+            const closeCombatStandoff = 0.82;
+            if (distXZ > closeCombatStandoff) {
               if (e.mesh.mixer) e.mesh.mixer.timeScale = 1.35;
-              const advanceDir = Math.sign(zDiff);
-              const advSpeed = (diff.advanceSpeed || 1.8) * (currentDifficulty === 'hard' ? 1.15 : 1.0);
-              e.mesh.root.position.z += advanceDir * advSpeed * delta;
+              const advSpeed = (diff.advanceSpeed || 2.0) * (currentDifficulty === 'hard' ? 1.15 : 1.0);
+              const dirX = dx / distXZ;
+              const dirZ = dz / distXZ;
+
+              // At long range, slight tactical lateral strafe; at close quarters, advance straight into player
+              const strafeWeight = distXZ > 4.0 ? 0.35 : (distXZ > 2.0 ? 0.15 : 0.0);
+              let moveX = dirX + e.patrolDir * strafeWeight;
+              let moveZ = dirZ;
+              const moveLen = Math.hypot(moveX, moveZ) || 1;
+
+              e.mesh.root.position.x += (moveX / moveLen) * advSpeed * delta;
+              e.mesh.root.position.z += (moveZ / moveLen) * advSpeed * delta;
+
+              // Street width clamp
+              e.mesh.root.position.x = Math.max(-13.5, Math.min(13.5, e.mesh.root.position.x));
 
               // Animate running legs
               e.walkTimer = (e.walkTimer || 0) + delta * 9;
@@ -5607,10 +5616,30 @@
               }
             } else {
               if (e.mesh.mixer) e.mesh.mixer.timeScale = 0.95;
-              // Reset leg position when in close combat standoff
+              // Reset leg position when in point-blank close combat standoff
               if (e.mesh.leftLeg && e.mesh.rightLeg) {
                 e.mesh.leftLeg.rotation.x = 0;
                 e.mesh.rightLeg.rotation.x = 0;
+              }
+
+              // Maintain minimum separation cushion (prevent clipping inside player)
+              if (distXZ < 0.78 && distXZ > 0.001) {
+                const push = (0.78 - distXZ);
+                e.mesh.root.position.x -= (dx / distXZ) * push;
+                e.mesh.root.position.z -= (dz / distXZ) * push;
+              }
+            }
+
+            // Soft enemy-to-enemy repulsion so multiple enemies don't overlap in close combat
+            for (const other of this.enemies) {
+              if (other === e || !other.alive) continue;
+              const sepX = e.mesh.root.position.x - other.mesh.root.position.x;
+              const sepZ = e.mesh.root.position.z - other.mesh.root.position.z;
+              const sepDist = Math.hypot(sepX, sepZ);
+              if (sepDist < 0.75 && sepDist > 0.01) {
+                const push = (0.75 - sepDist) * 0.4;
+                e.mesh.root.position.x += (sepX / sepDist) * push;
+                e.mesh.root.position.z += (sepZ / sepDist) * push;
               }
             }
 
@@ -6750,6 +6779,8 @@
 
         this.isReloading = false;
         this.isADS = false;
+        this.scopeZoomFov = 2.4; // 27.1X 預設狙擊放大倍率 (整張臉特寫)
+        this.userAdjustedScope = false; // 是否由玩家手動滾輪調整過
         this.stance = 'STAND'; // 'STAND', 'CROUCH', 'PRONE'
         this.isSprinting = false;
 
@@ -6874,6 +6905,7 @@
               if (crosshair) crosshair.classList.add('aiming');
             } else {
               if (crosshair) crosshair.classList.remove('aiming');
+              this.userAdjustedScope = false;
             }
           }
         });
@@ -6887,6 +6919,7 @@
               this.isADS = false;
               const crosshair = document.getElementById('crosshair-container');
               if (crosshair) crosshair.classList.remove('aiming');
+              this.userAdjustedScope = false;
             }
           }
         });
@@ -6896,16 +6929,20 @@
           if (gameState !== 'PLAYING') return;
           const isScopedWeapon = (this.currentWeaponId === 'rifle' || this.currentWeaponId === 'blaster');
           if (this.isADS && isScopedWeapon) {
-            if (!this.scopeZoomFov) this.scopeZoomFov = 10.0;
+            if (!this.scopeZoomFov) this.scopeZoomFov = 2.4;
+            this.userAdjustedScope = true;
             if (e.deltaY < 0) {
-              this.scopeZoomFov = Math.max(5.0, this.scopeZoomFov - 1.0); // 滾輪往前推：極限放大拉近至 13X
+              // 滾輪往前推：極致拉近特寫，最小至 0.8° (相當於 81.2X 超高倍率，整張臉佔滿瞄準鏡)
+              this.scopeZoomFov = Math.max(0.8, this.scopeZoomFov * 0.82);
             } else {
-              this.scopeZoomFov = Math.min(18.0, this.scopeZoomFov + 1.0); // 滾輪往後推：廣角拉遠
+              // 滾輪往後推：廣角拉遠，最大至 24.0° (適合近身快速鎖定整張臉)
+              this.scopeZoomFov = Math.min(24.0, this.scopeZoomFov * 1.22);
             }
             const scopeTag = document.getElementById('scope-tag');
             if (scopeTag) {
               const mag = (65 / this.scopeZoomFov).toFixed(1);
-              scopeTag.innerText = `OPTICAL ${mag}X // SNIPER SCOPE (滾輪調節)`;
+              const tagNote = this.scopeZoomFov <= 1.2 ? '整張臉極限特寫' : (this.scopeZoomFov <= 4.0 ? '高倍率狙擊' : '近身/廣角特寫');
+              scopeTag.innerText = `OPTICAL ${mag}X // SNIPER SCOPE (${tagNote})`;
             }
             return;
           }
@@ -7161,6 +7198,7 @@
             } else {
               btnAds.classList.remove('active');
               if (crosshair) crosshair.classList.remove('aiming');
+              this.userAdjustedScope = false;
             }
           };
           btnAds.addEventListener('touchstart', toggleAds, { passive: false });
@@ -7542,6 +7580,22 @@
           }
         }
 
+        // 實體防穿模碰撞體積：玩家近身時緊貼敵軍臉部 (0.78m)，絕不穿模進體內，呈現極致近身感
+        const MIN_ENEMY_DIST = 0.78;
+        if (typeof enemyManager !== 'undefined' && enemyManager.enemies) {
+          for (const e of enemyManager.enemies) {
+            if (!e.alive) continue;
+            const ex = e.mesh.root.position.x;
+            const ez = e.mesh.root.position.z;
+            if (Math.hypot(nextX - ex, this.position.z - ez) < MIN_ENEMY_DIST) {
+              canMoveX = false;
+            }
+            if (Math.hypot(this.position.x - ex, nextZ - ez) < MIN_ENEMY_DIST) {
+              canMoveZ = false;
+            }
+          }
+        }
+
         if (canMoveX) this.position.x = nextX;
         if (canMoveZ) this.position.z = nextZ;
 
@@ -7673,9 +7727,34 @@
           document.getElementById('crosshair-container').classList.remove('spread');
         }
 
-        // 瞄準鏡極限拉近放大 (High-Magnification Optical Scope Zoom)
-        const scopedFov = this.scopeZoomFov || 10.0;
-        const targetFov = this.isADS ? (isScopedWeapon ? scopedFov : 32) : 65;
+        // 瞄準鏡極限拉近放大 (High-Magnification Optical Scope Zoom & Close-Combat Face Framing)
+        let effectiveScopedFov = this.scopeZoomFov || 2.4;
+
+        // 如果玩家未手動滾輪鎖定，且正面近距離有敵軍 (< 2.5m)，自適應近身特寫倍率 (~16°~22°)，確保近身開鏡整張臉剛好佔滿瞄準鏡
+        if (!this.userAdjustedScope && typeof enemyManager !== 'undefined' && enemyManager.enemies) {
+          let closestDist = 999;
+          const camDir = new THREE.Vector3();
+          camera.getWorldDirection(camDir);
+          for (const e of enemyManager.enemies) {
+            if (!e.alive) continue;
+            const toE = e.mesh.root.position.clone().sub(this.position);
+            toE.y = 0;
+            const d = toE.length();
+            if (d < 2.5 && toE.normalize().dot(camDir) > 0.35) {
+              if (d < closestDist) closestDist = d;
+            }
+          }
+          if (closestDist < 2.5) {
+            effectiveScopedFov = Math.min(22.0, Math.max(14.0, closestDist * 16.0));
+            const scopeTag = document.getElementById('scope-tag');
+            if (scopeTag) {
+              const mag = (65 / effectiveScopedFov).toFixed(1);
+              scopeTag.innerText = `OPTICAL ${mag}X // SNIPER SCOPE (近身臉部特寫)`;
+            }
+          }
+        }
+
+        const targetFov = this.isADS ? (isScopedWeapon ? effectiveScopedFov : 28) : 65;
         camera.fov = THREE.MathUtils.lerp(camera.fov, targetFov, 16 * delta);
         camera.updateProjectionMatrix();
 
