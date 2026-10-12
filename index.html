@@ -5158,28 +5158,55 @@
     }
 
     // ----------------------------------------------------
-    // BULLET HOLES ON ENEMY BODY (身體彈孔貼花)
+    // BULLET HOLES ON ENEMY BODY (身體彈孔與血肉貼花)
     // ----------------------------------------------------
-    const bulletHoleGeo = new THREE.CircleGeometry(0.038, 8);
+    const bulletHoleGeo = new THREE.CircleGeometry(0.045, 10);
     const bulletHoleMat = new THREE.MeshBasicMaterial({
-      color: 0x110202,
+      color: 0x0a0101,
       side: THREE.DoubleSide,
-      depthWrite: false
+      depthWrite: false,
+      polygonOffset: true,
+      polygonOffsetFactor: -1,
+      polygonOffsetUnits: -1
     });
 
-    function attachBulletHoleToMesh(meshObj, worldPoint, worldNormal) {
-      if (!meshObj) return;
-      const decal = new THREE.Mesh(bulletHoleGeo, bulletHoleMat);
-      decal.userData.isDecal = true;
+    const fleshWoundGeo = new THREE.CircleGeometry(0.095, 12);
+    const fleshWoundMat = new THREE.MeshBasicMaterial({
+      color: 0x6e0004,
+      side: THREE.DoubleSide,
+      depthWrite: false,
+      polygonOffset: true,
+      polygonOffsetFactor: -1,
+      polygonOffsetUnits: -1
+    });
 
-      // Transform world coordinate into target mesh's local coordinate
-      const localPos = meshObj.worldToLocal(worldPoint.clone());
-      const invQuat = meshObj.getWorldQuaternion(new THREE.Quaternion()).invert();
+    function attachBulletHoleToMesh(meshObj, worldPoint, worldNormal, targetRoot = null) {
+      const parent = targetRoot || (meshObj && meshObj.userData && meshObj.userData.enemyObj && meshObj.userData.enemyObj.root) || (meshObj && meshObj.userData && meshObj.userData.dummyObj && meshObj.userData.dummyObj.root) || (meshObj && meshObj.root) || meshObj;
+      if (!parent || !worldPoint) return;
+
+      const group = new THREE.Group();
+      group.userData.isDecal = true;
+
+      // 1. Bloody flesh wound border around entry hole (血肉模糊鮮血邊緣)
+      const bloodWound = new THREE.Mesh(fleshWoundGeo, fleshWoundMat.clone());
+      const woundScale = 0.8 + Math.random() * 0.7;
+      bloodWound.scale.set(woundScale, woundScale * (0.8 + Math.random() * 0.4), 1);
+      bloodWound.rotation.z = Math.random() * Math.PI * 2;
+      group.add(bloodWound);
+
+      // 2. Charred dark bullet hole core (焦黑彈孔中心)
+      const hole = new THREE.Mesh(bulletHoleGeo, bulletHoleMat);
+      hole.position.z = 0.002;
+      group.add(hole);
+
+      // Transform world coordinate into parent mesh's local coordinate
+      const localPos = parent.worldToLocal(worldPoint.clone());
+      const invQuat = parent.getWorldQuaternion(new THREE.Quaternion()).invert();
       const localNormal = worldNormal ? worldNormal.clone().applyQuaternion(invQuat) : new THREE.Vector3(0, 0, 1);
 
-      decal.position.copy(localPos).addScaledVector(localNormal, 0.006);
-      decal.lookAt(decal.position.clone().add(localNormal));
-      meshObj.add(decal);
+      group.position.copy(localPos).addScaledVector(localNormal, 0.012);
+      group.lookAt(group.position.clone().add(localNormal));
+      parent.add(group);
     }
 
     // ----------------------------------------------------
@@ -5486,17 +5513,49 @@
         const effectPos = hitPoint || enemy.mesh.root.position.clone().add(new THREE.Vector3(0, 1.4, 0));
         const shotDir = bulletDir || new THREE.Vector3(0, 0, -1);
 
-        if (hitObject && hitPoint) {
-          attachBulletHoleToMesh(hitObject, hitPoint, hitNormal);
+        if (hitPoint) {
+          attachBulletHoleToMesh(hitObject, effectPos, hitNormal, enemy.mesh.root);
         }
         spawnBloodSplatter(effectPos, shotDir, isHeadshot ? 34 : 24);
-        spawnGroundBloodStain(effectPos.x, effectPos.z, 0.32);
+        spawnGroundBloodStain(effectPos.x, effectPos.z, 0.45);
 
         if (enemy.hp <= 0) {
           enemy.alive = false;
           enemy.state = 'dead';
           enemy.isCorpse = true;
+          enemy.corpseHits = 0;
+          enemy.deathAnim = 0;
+          enemy.mesh.root.visible = true; // 屍體永久留在戰場上，絕不消失！
           this.handleEnemyDeath(enemy, isHeadshot, shotDir, effectPos);
+        }
+      }
+
+      damageCorpse(enemy, hitPoint, hitNormal, bulletDir, damage = 35) {
+        if (!enemy) return;
+        enemy.isCorpse = true;
+        enemy.corpseHits = (enemy.corpseHits || 0) + 1;
+
+        const effectPos = hitPoint || enemy.mesh.root.position.clone().add(new THREE.Vector3(0, 0.15, 0));
+        const shotDir = bulletDir || new THREE.Vector3(0, -1, 0);
+
+        audio.playFleshHit();
+        attachBulletHoleToMesh(null, effectPos, hitNormal || new THREE.Vector3(0, 1, 0), enemy.mesh.root);
+
+        const bloodIntensity = Math.min(50, 24 + enemy.corpseHits * 2);
+        spawnBloodSplatter(effectPos, shotDir.clone().negate().add(new THREE.Vector3(0, 2, 0)), bloodIntensity);
+        spawnGroundBloodStain(effectPos.x, effectPos.z, Math.min(1.2, 0.35 + enemy.corpseHits * 0.08));
+
+        // 倒地中彈物理抽搐衝擊
+        enemy.mesh.root.position.y = Math.min(0.24, enemy.mesh.root.position.y + 0.035);
+        enemy.mesh.root.position.x += (Math.random() - 0.5) * 0.03;
+        enemy.mesh.root.position.z += (Math.random() - 0.5) * 0.03;
+        enemy.mesh.root.visible = true; // 屍體永久保持可見
+
+        if (enemy.corpseHits % 4 === 0) {
+          spawnSparks(effectPos, 16, 'orange');
+          if (enemy.corpseHits >= 8) {
+            addKillFeed(`🩸 猛烈鞭屍掃射！血肉模糊 (身中 ${enemy.corpseHits} 彈)`);
+          }
         }
       }
 
@@ -5516,33 +5575,21 @@
       }
 
       dismemberCorpse(enemy, blastOrigin = null) {
-        if (!enemy || enemy.corpseDismembered) return;
-        enemy.corpseDismembered = true;
-        enemy.mesh.root.visible = false;
+        if (!enemy) return;
+        enemy.corpseHits = (enemy.corpseHits || 0) + 5;
+        enemy.mesh.root.visible = true; // 屍體絕對不消失！
 
-        const parts = [
-          enemy.mesh.head, enemy.mesh.torso,
-          enemy.mesh.leftArm, enemy.mesh.rightArm,
-          enemy.mesh.leftLeg, enemy.mesh.rightLeg
-        ];
+        const centerWorld = enemy.mesh.root.position.clone().add(new THREE.Vector3(0, 0.2, 0));
+        spawnBloodSplatter(centerWorld, new THREE.Vector3(0, 1, 0), 55);
+        spawnGroundBloodStain(centerWorld.x, centerWorld.z, 0.95);
 
+        // 碎肉噴濺，但身體依然躺在地上
+        const parts = [enemy.mesh.leftArm, enemy.mesh.rightArm];
         parts.forEach(part => {
-          if (part) {
-            createLimbGib(part, blastOrigin);
-          }
+          if (part) createLimbGib(part, blastOrigin || centerWorld, 1.2);
         });
 
-        // Massive blood explosion burst
-        const centerWorld = enemy.mesh.root.position.clone().add(new THREE.Vector3(0, 1.1, 0));
-        spawnBloodSplatter(centerWorld, new THREE.Vector3(0, 1, 0), 50);
-        spawnGroundBloodStain(centerWorld.x, centerWorld.z, 0.85);
-
-        addKillFeed('💥 炸碎肢體！敵軍徹底分解');
-        updateEnemyCounterHUD(this.getAliveCount(), this.enemies.length);
-
-        if (this.getAliveCount() === 0) {
-          triggerVictory();
-        }
+        addKillFeed('💥 猛烈重擊！屍體血肉模糊');
       }
 
       dismemberEnemy(enemy, blastOrigin) {
@@ -5558,14 +5605,16 @@
           }
           if (!e.alive) {
             if (e.mesh.mixer) {
-              e.mesh.mixer.timeScale = 0.2;
+              e.mesh.mixer.timeScale = 0; // 死亡時骨骼動畫停止
             }
-            if (e.corpseDismembered) continue;
-            if (e.deathAnim < 1 && e.mesh.root.visible) {
-              e.deathAnim += delta * 2.5;
-              e.mesh.root.rotation.x = Math.min(Math.PI / 2, e.mesh.root.rotation.x + delta * 2.8);
-              e.mesh.root.position.y = Math.max(0.08, e.mesh.root.position.y - delta * 1.5);
+            if ((e.deathAnim || 0) < 1) {
+              e.deathAnim = (e.deathAnim || 0) + delta * 3.5;
+              e.mesh.root.rotation.x = Math.min(Math.PI / 2, e.mesh.root.rotation.x + delta * 4.2);
+              e.mesh.root.position.y = Math.max(0.12, e.mesh.root.position.y - delta * 2.2);
             }
+            // 屍體牢固貼在地面上，絕不消失
+            e.mesh.root.position.y = Math.max(0.08, Math.min(0.22, e.mesh.root.position.y));
+            e.mesh.root.visible = true;
             continue;
           }
 
@@ -6000,71 +6049,82 @@
         const effectPos = hitPoint || dummy.mesh.root.position.clone().add(new THREE.Vector3(0, 1.4, 0));
         const shotDir = bulletDir || new THREE.Vector3(0, 0, -1);
 
-        if (hitObject && hitPoint) {
-          attachBulletHoleToMesh(hitObject, hitPoint, hitNormal);
+        if (hitPoint) {
+          attachBulletHoleToMesh(hitObject, effectPos, hitNormal, dummy.mesh.root);
         }
         spawnSparks(effectPos, isHeadshot ? 24 : 16, 'orange');
-        spawnBloodSplatter(effectPos, shotDir, 14);
+        spawnBloodSplatter(effectPos, shotDir, 20);
+        spawnGroundBloodStain(effectPos.x, effectPos.z, 0.45);
 
         practiceTargetsHit++;
         showHitMarker(isHeadshot);
         updateHUD();
 
         if (dummy.hp <= 0) {
-          this.dismemberDummy(dummy, effectPos, false);
+          dummy.alive = false;
+          dummy.isCorpse = true;
+          dummy.corpseHits = 0;
+          dummy.deathAnim = 0;
+          dummy.mesh.root.visible = true; // 倒地絕不消失！
+          audio.playDeathSound();
+          addKillFeed('🎯 人偶被擊破倒地！可持續掃射血肉模糊');
+        }
+      }
+
+      damageCorpse(dummy, hitPoint, hitNormal, bulletDir) {
+        if (!dummy) return;
+        dummy.isCorpse = true;
+        dummy.corpseHits = (dummy.corpseHits || 0) + 1;
+
+        const effectPos = hitPoint || dummy.mesh.root.position.clone().add(new THREE.Vector3(0, 0.15, 0));
+        const shotDir = bulletDir || new THREE.Vector3(0, -1, 0);
+
+        audio.playFleshHit();
+        attachBulletHoleToMesh(null, effectPos, hitNormal || new THREE.Vector3(0, 1, 0), dummy.mesh.root);
+
+        const bloodIntensity = Math.min(50, 24 + dummy.corpseHits * 2);
+        spawnBloodSplatter(effectPos, shotDir.clone().negate().add(new THREE.Vector3(0, 2, 0)), bloodIntensity);
+        spawnGroundBloodStain(effectPos.x, effectPos.z, Math.min(1.2, 0.35 + dummy.corpseHits * 0.08));
+
+        // 倒地受擊抽搐抖動
+        dummy.mesh.root.position.y = Math.min(0.24, dummy.mesh.root.position.y + 0.035);
+        dummy.mesh.root.position.x += (Math.random() - 0.5) * 0.03;
+        dummy.mesh.root.position.z += (Math.random() - 0.5) * 0.03;
+        dummy.mesh.root.visible = true;
+
+        showHitMarker(false);
+        practiceTargetsHit++;
+        updateHUD();
+
+        if (dummy.corpseHits % 4 === 0) {
+          spawnSparks(effectPos, 16, 'orange');
+          if (dummy.corpseHits >= 8) {
+            addKillFeed(`🩸 掃射倒地人偶！血肉模糊 (身中 ${dummy.corpseHits} 彈)`);
+          }
         }
       }
 
       dismemberDummy(dummy, sliceOrigin, isSaber = false) {
-        if (!dummy || !dummy.alive) return;
-        dummy.alive = false;
-        dummy.respawnTimer = 3.0; // Respawns after 3s
-        dummy.mesh.root.visible = false;
-
-        audio.playDismemberment();
+        if (!dummy) return;
+        this.damageCorpse(dummy, sliceOrigin, new THREE.Vector3(0, 1, 0), new THREE.Vector3(0, -1, 0));
         if (isSaber) {
           audio.playSaberHit();
           practiceTargetsSliced++;
         }
-
-        const parts = [
-          dummy.mesh.head,
-          dummy.mesh.torso,
-          dummy.mesh.leftArm,
-          dummy.mesh.rightArm,
-          dummy.mesh.leftLeg,
-          dummy.mesh.rightLeg
-        ];
-
-        parts.forEach(part => {
-          if (part) {
-            createLimbGib(part, sliceOrigin, isSaber ? 1.5 : 1.0);
-          }
-        });
-
-        const centerWorld = dummy.mesh.root.position.clone().add(new THREE.Vector3(0, 1.1, 0));
-        spawnSparks(centerWorld, 32, isSaber ? 'cyan' : 'orange');
-        spawnBloodSplatter(centerWorld, new THREE.Vector3(0, 1, 0), 26);
-        spawnGroundBloodStain(centerWorld.x, centerWorld.z, 0.65);
-
-        addKillFeed(isSaber ? '⚡ 光劍水果忍者斬碎！靶人完全分解' : '🎯 戰術練習靶擊破！');
         updateHUD();
       }
 
       update(delta) {
         for (const dummy of this.dummies) {
           if (!dummy.alive) {
-            dummy.respawnTimer -= delta;
-            if (dummy.respawnTimer <= 0) {
-              // Respawn dummy
-              dummy.alive = true;
-              dummy.hp = dummy.maxHp;
-              dummy.mesh.root.visible = true;
-              dummy.mesh.root.position.copy(dummy.originalPos);
-
-              // Spawn flash effect
-              spawnSparks(dummy.originalPos.clone().add(new THREE.Vector3(0, 1.0, 0)), 18, 'cyan');
+            // 倒在地上不消失，保持完整屍體呈現
+            if ((dummy.deathAnim || 0) < 1) {
+              dummy.deathAnim = Math.min(1, (dummy.deathAnim || 0) + delta * 3.5);
+              dummy.mesh.root.rotation.x = THREE.MathUtils.lerp(0, Math.PI / 2, dummy.deathAnim);
+              dummy.mesh.root.position.y = THREE.MathUtils.lerp(0, 0.12, dummy.deathAnim);
             }
+            dummy.mesh.root.position.y = Math.max(0.08, Math.min(0.22, dummy.mesh.root.position.y));
+            dummy.mesh.root.visible = true; // 屍體永久保持可見
           }
         }
       }
@@ -6536,12 +6596,12 @@
         }
       }
 
-      // Secondary Gibbing: Dismember any dead enemy corpses caught in explosion!
+      // Secondary Blast on Corpses: explosion blasts corpses on ground into a bloody mess!
       for (const e of enemyManager.enemies) {
-        if (!e.alive && e.isCorpse && !e.corpseDismembered) {
-          const corpsePos = e.mesh.root.position.clone().add(new THREE.Vector3(0, 0.4, 0));
+        if (!e.alive && e.isCorpse) {
+          const corpsePos = e.mesh.root.position.clone().add(new THREE.Vector3(0, 0.2, 0));
           if (corpsePos.distanceTo(center) <= radius) {
-            enemyManager.dismemberEnemy(e, center);
+            enemyManager.damageCorpse(e, corpsePos, new THREE.Vector3(0, 1, 0), center, 150);
           }
         }
       }
@@ -7876,7 +7936,7 @@
 
         const enemyHitTargets = [];
         for (const e of enemyManager.enemies) {
-          if (e.alive || (e.isCorpse && !e.corpseDismembered)) {
+          if (e.alive || e.isCorpse) {
             enemyHitTargets.push(e.mesh.head, e.mesh.torso, e.mesh.leftArm, e.mesh.rightArm, e.mesh.leftLeg, e.mesh.rightLeg);
             if (e.mesh.pelvis && e.mesh.pelvis !== e.mesh.root) {
               enemyHitTargets.push(e.mesh.pelvis);
@@ -7892,7 +7952,7 @@
 
         const dummyHitTargets = [];
         for (const d of trainingDummyManager.dummies) {
-          if (d.alive) {
+          if (d.alive || d.isCorpse) {
             dummyHitTargets.push(d.mesh.head, d.mesh.torso, d.mesh.leftArm, d.mesh.rightArm, d.mesh.leftLeg, d.mesh.rightLeg);
           }
         }
@@ -7945,19 +8005,30 @@
             showHitMarker(false);
           } else if (enemyId !== null) {
             const enemy = enemyManager.enemies.find(e => e.id === enemyId);
-            if (enemy && !enemy.alive && enemy.isCorpse && !enemy.corpseDismembered) {
-              // 屍體可以再爆碎：再次射擊倒地遺體，觸發劇烈碎肢與大噴血！
-              enemyManager.dismemberEnemy(enemy, hitPoint);
-              showHitMarker(false);
-              addKillFeed('💥 射擊爆碎敵軍遺體');
-            } else if (enemy && enemy.alive) {
-              const damage = isHead ? config.headDamage : (diff.isGod ? config.damage * 2.5 : config.damage);
-              enemyManager.damageEnemy(enemyId, damage, isHead, hitPoint, hitSubMesh, hit.face ? hit.face.normal : null, raycaster.ray.direction);
-              showHitMarker(isHead);
+            if (enemy) {
+              if (enemy.alive) {
+                const damage = isHead ? config.headDamage : (diff.isGod ? config.damage * 2.5 : config.damage);
+                enemyManager.damageEnemy(enemyId, damage, isHead, hitPoint, hitSubMesh, hit.face ? hit.face.normal : null, raycaster.ray.direction);
+                showHitMarker(isHead);
+              } else {
+                // 屍體倒在地上不消失，可以一直打，打到血肉模糊！
+                enemyManager.damageCorpse(enemy, hitPoint, hit.face ? hit.face.normal : null, raycaster.ray.direction, config.damage);
+                showHitMarker(false);
+              }
             }
           } else if (dummyId !== null) {
-            const damage = isHead ? config.headDamage : config.damage;
-            trainingDummyManager.damageDummy(dummyId, damage, isHead, hitPoint, hitSubMesh, hit.face ? hit.face.normal : null, raycaster.ray.direction);
+            const dummy = trainingDummyManager.dummies.find(d => d.id === dummyId);
+            if (dummy) {
+              if (dummy.alive) {
+                const damage = isHead ? config.headDamage : config.damage;
+                trainingDummyManager.damageDummy(dummyId, damage, isHead, hitPoint, hitSubMesh, hit.face ? hit.face.normal : null, raycaster.ray.direction);
+                showHitMarker(isHead);
+              } else {
+                // 人偶屍體倒在地上不消失，可以一直打，打到血肉模糊！
+                trainingDummyManager.damageCorpse(dummy, hitPoint, hit.face ? hit.face.normal : null, raycaster.ray.direction);
+                showHitMarker(false);
+              }
+            }
           }
         } else {
           const farPoint = camera.position.clone().add(raycaster.ray.direction.clone().multiplyScalar(140));
@@ -8002,18 +8073,18 @@
             if (dist <= meleeRange) {
               const dot = toEnemy.normalize().dot(camDir);
               if (dot > 0.35) {
-                enemyManager.dismemberEnemy(e, playerEye);
+                enemyManager.damageEnemy(e.id, 999, false, enemyPos, null, null, camDir);
                 spawnSparks(enemyPos, 30, 'cyan');
                 hitAny = true;
               }
             }
-          } else if (e.isCorpse && !e.corpseDismembered) {
-            // 光劍斬碎屍體
-            const corpsePos = e.mesh.root.position.clone().add(new THREE.Vector3(0, 0.4, 0));
+          } else if (e.isCorpse) {
+            // 光劍劈砍倒地屍體，血肉模糊絕不消失！
+            const corpsePos = e.mesh.root.position.clone().add(new THREE.Vector3(0, 0.2, 0));
             const toCorpse = corpsePos.clone().sub(playerEye);
             if (toCorpse.length() <= meleeRange) {
-              if (toCorpse.normalize().dot(camDir) > 0.25) {
-                enemyManager.dismemberEnemy(e, playerEye);
+              if (toCorpse.normalize().dot(camDir) > 0.20) {
+                enemyManager.damageCorpse(e, corpsePos, new THREE.Vector3(0, 1, 0), camDir, 120);
                 spawnSparks(corpsePos, 25, 'cyan');
                 hitAny = true;
               }
@@ -8039,15 +8110,17 @@
 
         // Check training dummies
         for (const d of trainingDummyManager.dummies) {
-          if (!d.alive) continue;
-          const dummyPos = d.mesh.root.position.clone().add(new THREE.Vector3(0, 1.1, 0));
+          const dummyPos = d.mesh.root.position.clone().add(new THREE.Vector3(0, d.alive ? 1.1 : 0.2, 0));
           const toDummy = dummyPos.clone().sub(playerEye);
           const dist = toDummy.length();
           if (dist <= meleeRange) {
             const dot = toDummy.normalize().dot(camDir);
-            if (dot > 0.35) {
-              // FRUIT NINJA DECOMPOSITION / DISMEMBERMENT!
-              trainingDummyManager.dismemberDummy(d, playerEye, true);
+            if (dot > 0.20) {
+              if (d.alive) {
+                trainingDummyManager.damageDummy(d.id, 999, false, dummyPos, null, null, camDir);
+              } else {
+                trainingDummyManager.damageCorpse(d, dummyPos, new THREE.Vector3(0, 1, 0), camDir);
+              }
               spawnSparks(dummyPos, 34, 'cyan');
               hitAny = true;
             }
