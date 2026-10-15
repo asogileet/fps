@@ -740,35 +740,70 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(3, 7, 12, 0.88);
+      background: rgba(3, 7, 12, 0.90);
       backdrop-filter: blur(8px);
       -webkit-backdrop-filter: blur(8px);
       z-index: 50;
       display: flex;
       justify-content: center;
-      align-items: center;
+      align-items: flex-start;
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
       touch-action: pan-y;
-      padding: 14px;
+      padding: 16px 14px 48px 14px;
       box-sizing: border-box;
     }
     .modal-box {
-      width: 92%;
+      width: 94%;
       max-width: 680px;
-      max-height: 92vh;
-      max-height: 92dvh;
       margin: auto;
       background: linear-gradient(180deg, #0d1620 0%, #060a0f 100%);
       border: 1px solid rgba(0, 255, 170, 0.35);
       box-shadow: 0 0 50px rgba(0, 0, 0, 0.9), 0 0 30px rgba(0, 255, 170, 0.1);
       border-radius: 8px;
-      padding: 24px 28px;
+      padding: 22px 26px;
       text-align: center;
       position: relative;
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
       touch-action: pan-y;
+    }
+    .orient-inline-banner {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: rgba(0, 229, 255, 0.08);
+      border: 1px solid rgba(0, 229, 255, 0.3);
+      border-radius: 6px;
+      padding: 8px 12px;
+      margin-bottom: 12px;
+      font-size: 12px;
+      color: #64d2ff;
+      line-height: 1.4;
+      text-align: center;
+    }
+    .controls-toggle-wrap {
+      display: none;
+      margin-bottom: 6px;
+    }
+    .toggle-controls-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      color: #8aa4b8;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 6px 14px;
+      border-radius: 4px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      touch-action: manipulation;
+      transition: all 0.2s;
+    }
+    .toggle-controls-btn:hover {
+      background: rgba(0, 255, 170, 0.12);
+      border-color: rgba(0, 255, 170, 0.4);
+      color: #00ffaa;
     }
     .modal-title {
       font-size: 32px;
@@ -1062,19 +1097,22 @@
 
     .start-btn-wrap {
       position: sticky;
-      bottom: -1px;
-      background: linear-gradient(180deg, rgba(6, 10, 15, 0) 0%, rgba(6, 10, 15, 0.95) 25%, #060a0f 100%);
-      padding: 10px 0 2px 0;
-      margin-top: 8px;
-      z-index: 10;
+      bottom: 0;
+      background: linear-gradient(180deg, rgba(6, 10, 15, 0) 0%, rgba(6, 10, 15, 0.96) 20%, #060a0f 100%);
+      padding: 12px 0 4px 0;
+      margin-top: 10px;
+      z-index: 100;
       width: 100%;
       display: flex;
       justify-content: center;
+      pointer-events: auto;
     }
 
     .start-btn, .sec-btn, .mode-select-btn, .diff-btn, .time-btn {
       touch-action: manipulation;
-      -webkit-tap-highlight-color: rgba(0, 255, 170, 0.25);
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      -webkit-user-select: none;
     }
 
     .start-btn {
@@ -1084,16 +1122,26 @@
       font-weight: 900;
       letter-spacing: 2px;
       padding: 14px 44px;
+      min-height: 52px;
       border: none;
-      border-radius: 4px;
+      border-radius: 6px;
       cursor: pointer;
       box-shadow: 0 0 25px rgba(0, 221, 136, 0.45);
-      transition: all 0.2s;
+      transition: all 0.18s ease-out;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
     }
     .start-btn:hover {
       background: linear-gradient(135deg, #00ffaa, #00bb66);
       box-shadow: 0 0 35px rgba(0, 255, 170, 0.7);
       transform: scale(1.03);
+    }
+    .start-btn:active {
+      transform: scale(0.96);
+      box-shadow: 0 0 15px rgba(0, 255, 170, 0.9);
+      filter: brightness(1.15);
     }
 
     /* Pause Menu & End Game Modals */
@@ -1405,11 +1453,9 @@
         font-size: 14px;
       }
       .modal-box {
-        max-width: 95vw;
-        max-height: 92vh;
-        max-height: 92dvh;
-        padding: 14px 18px;
-        overflow-y: auto;
+        max-width: 96vw;
+        margin: 8px auto 28px auto;
+        padding: 14px 16px;
       }
       .modal-title {
         font-size: 22px;
@@ -1468,9 +1514,13 @@
         gap: 4px 8px;
         margin-bottom: 10px;
       }
+      .controls-grid.collapsed-mobile {
+        display: none !important;
+      }
       .start-btn {
-        font-size: 16px;
-        padding: 11px 36px;
+        font-size: 17px;
+        padding: 13px 40px;
+        min-height: 52px;
       }
     }
   </style>
@@ -1588,9 +1638,12 @@
       <div class="orient-icon">🔄📱</div>
       <div class="orient-title">建議使用橫向螢幕遊玩</div>
       <div class="orient-desc">為了提供最廣闊的戰場視野與最佳虛擬搖桿操作，建議將您的 iPad / 平板轉為橫向模式 (Landscape)。</div>
-      <div style="margin-top: 24px; display: flex; flex-direction: column; gap: 12px; align-items: center;">
-        <button id="dismiss-orient-btn" class="start-btn" style="font-size: 15px; padding: 12px 28px; background: linear-gradient(135deg, #00b4d8, #0077b6); box-shadow: 0 0 20px rgba(0, 180, 216, 0.45); touch-action: manipulation; cursor: pointer;">
-          保持直向直接進入 (CONTINUE IN PORTRAIT)
+      <div style="margin-top: 24px; display: flex; flex-direction: column; gap: 14px; align-items: center; width: 100%; max-width: 380px;">
+        <button id="orient-deploy-btn" class="start-btn" style="width: 100%; font-size: 18px; padding: 15px 32px; background: linear-gradient(135deg, #00ffaa, #00bb66); color: #04140b; box-shadow: 0 0 30px rgba(0, 255, 170, 0.65); cursor: pointer; touch-action: manipulation;">
+          🚀 進入戰場 (DEPLOY)
+        </button>
+        <button id="dismiss-orient-btn" class="sec-btn" style="width: 100%; font-size: 14px; padding: 12px 24px; background: rgba(0, 221, 136, 0.08); border: 1px solid rgba(0, 255, 170, 0.35); color: #a0c4dc; cursor: pointer; touch-action: manipulation;">
+          ⚙️ 調整設定 (難度 / 模式 / 人偶 / 時間)
         </button>
       </div>
     </div>
@@ -1675,6 +1728,11 @@
     <!-- Start & Difficulty Selection Modal -->
     <div class="modal-backdrop" id="start-modal">
       <div class="modal-box">
+        <div class="orient-inline-banner">
+          <span style="font-size:16px;">💡</span>
+          <span><b>平板 / 手機提示：</b>建議將設備轉為<b>橫向 (Landscape)</b> 遊玩，視野更廣闊、雙手操作更順暢！</span>
+        </div>
+
         <div class="modal-title">WARZONE: OPS</div>
         <div class="modal-subtitle">現代戰術射擊 (TACTICAL MILITARY FPS / TPS)</div>
 
@@ -1752,6 +1810,13 @@
         </div>
         <input type="file" id="custom-model-file-input" accept=".glb,.gltf,.vrm" style="display:none;">
 
+        <div class="controls-toggle-wrap">
+          <button type="button" id="toggle-controls-btn" class="toggle-controls-btn">
+            <span>🎮 操作按鍵說明 (點擊展開 / 收合)</span>
+            <span id="controls-arrow-icon">▾</span>
+          </button>
+        </div>
+
         <div class="controls-grid" id="controls-hint-grid">
           <div><span class="key-badge">WASD / 虛擬搖桿</span> 移動前進後退</div>
           <div><span class="key-badge">滑鼠 / 右側觸控</span> 旋轉視角與瞄準</div>
@@ -1771,7 +1836,7 @@
         </div>
 
         <div class="start-btn-wrap">
-          <button class="start-btn" id="start-btn">進入戰場 (DEPLOY)</button>
+          <button class="start-btn" id="start-btn">🚀 進入戰場 (DEPLOY)</button>
         </div>
       </div>
     </div>
@@ -8643,7 +8708,7 @@
       if (!btn) return;
       let lastTrigger = 0;
       const handler = (e) => {
-        if (e && e.cancelable && e.type === 'touchend') {
+        if (e && e.cancelable && (e.type === 'touchend' || e.type === 'pointerup')) {
           e.preventDefault();
         }
         const now = performance.now();
@@ -8658,9 +8723,18 @@
       };
       btn.addEventListener('click', handler);
       btn.addEventListener('touchend', handler, { passive: false });
+      btn.addEventListener('pointerup', (e) => {
+        if (e && e.pointerType === 'touch') {
+          handler(e);
+        }
+      });
     }
 
     bindModalAction('start-btn', () => {
+      startGame(currentDifficulty, currentGameMode);
+    });
+
+    bindModalAction('orient-deploy-btn', () => {
       startGame(currentDifficulty, currentGameMode);
     });
 
@@ -8692,7 +8766,26 @@
         ow.classList.add('dismissed');
         ow.style.display = 'none';
       }
+      const startModal = document.getElementById('start-modal');
+      if (startModal) {
+        startModal.style.display = 'flex';
+      }
     });
+
+    // Mobile / Tablet Controls Collapsible Hint
+    const toggleControlsBtn = document.getElementById('toggle-controls-btn');
+    const controlsGrid = document.getElementById('controls-hint-grid');
+    const controlsArrow = document.getElementById('controls-arrow-icon');
+    if (toggleControlsBtn && controlsGrid) {
+      if (isTouchDevice || window.innerWidth <= 1024) {
+        controlsGrid.classList.add('collapsed-mobile');
+        if (controlsArrow) controlsArrow.textContent = '▸';
+      }
+      toggleControlsBtn.addEventListener('click', () => {
+        const isCollapsed = controlsGrid.classList.toggle('collapsed-mobile');
+        if (controlsArrow) controlsArrow.textContent = isCollapsed ? '▸' : '▾';
+      });
+    }
 
     // ----------------------------------------------------
     // MAIN GAME RENDER LOOP
