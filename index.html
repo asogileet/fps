@@ -241,6 +241,123 @@
       letter-spacing: 2px;
       text-shadow: 0 0 10px rgba(0, 255, 180, 0.7);
     }
+    .scope-presets {
+      position: absolute;
+      top: 13%;
+      display: flex;
+      gap: 6px;
+      z-index: 25;
+      pointer-events: auto;
+    }
+    .scope-preset-btn {
+      background: rgba(6, 16, 24, 0.88);
+      border: 1px solid rgba(0, 255, 180, 0.45);
+      border-radius: 6px;
+      color: rgba(0, 255, 180, 0.9);
+      font-family: 'Consolas', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      cursor: pointer;
+      transition: all 0.12s ease;
+      box-shadow: 0 0 8px rgba(0, 255, 180, 0.18);
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+    }
+    .scope-preset-btn:hover {
+      background: rgba(0, 255, 180, 0.25);
+      border-color: #00ffaa;
+      color: #fff;
+      transform: scale(1.06);
+    }
+    .scope-preset-btn.active {
+      background: linear-gradient(135deg, rgba(0, 255, 170, 0.4), rgba(0, 200, 255, 0.4));
+      border-color: #00ffaa;
+      color: #ffffff;
+      box-shadow: 0 0 12px rgba(0, 255, 180, 0.65);
+      font-weight: 900;
+    }
+    .scope-rangefinder {
+      position: absolute;
+      top: 21.5%;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'Consolas', monospace;
+      font-size: 11px;
+      font-weight: 800;
+      color: #00e1ff;
+      letter-spacing: 1.5px;
+      background: rgba(4, 12, 18, 0.82);
+      border: 1px solid rgba(0, 225, 255, 0.4);
+      border-radius: 10px;
+      padding: 3px 12px;
+      text-shadow: 0 0 8px rgba(0, 225, 255, 0.7);
+    }
+    .scope-rangefinder .range-mode {
+      color: #ff3344;
+      font-weight: 900;
+    }
+    .scope-rangefinder .range-mode.locked {
+      color: #00ff88;
+    }
+    .scope-mildots-h, .scope-mildots-v {
+      position: absolute;
+      pointer-events: none;
+    }
+    .scope-mildots-h {
+      width: 76%;
+      height: 12px;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+    }
+    .scope-mildots-v {
+      height: 76%;
+      width: 12px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
+      align-items: center;
+    }
+    .scope-mildot {
+      width: 3px;
+      height: 3px;
+      background: rgba(0, 255, 180, 0.85);
+      border-radius: 50%;
+      box-shadow: 0 0 4px rgba(0, 255, 180, 0.8);
+    }
+    .scope-zoom-gauge {
+      position: absolute;
+      bottom: 8.5%;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(6, 14, 22, 0.82);
+      border: 1px solid rgba(0, 255, 180, 0.45);
+      border-radius: 14px;
+      padding: 4px 12px;
+      font-family: 'Consolas', monospace;
+      font-size: 11px;
+      color: #00ffaa;
+      box-shadow: 0 0 12px rgba(0, 255, 170, 0.25);
+    }
+    .scope-zoom-track {
+      width: 120px;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.16);
+      border-radius: 3px;
+      overflow: hidden;
+      position: relative;
+    }
+    .scope-zoom-fill {
+      height: 100%;
+      width: 35%;
+      background: linear-gradient(90deg, #00ffaa, #00e1ff, #ff3355);
+      border-radius: 3px;
+      transition: width 0.08s ease-out;
+    }
 
     /* Hit Marker */
     #hitmarker {
@@ -869,13 +986,13 @@
     /* Enemy 3D Model Selection */
     .enemy-model-grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 10px;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 8px;
       margin-bottom: 22px;
     }
     @media (max-width: 650px) {
       .enemy-model-grid {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(3, 1fr);
       }
     }
     .enemy-model-btn {
@@ -902,13 +1019,23 @@
       background: rgba(255, 102, 204, 0.22);
       box-shadow: 0 0 20px rgba(255, 102, 204, 0.35);
     }
+    .enemy-model-btn[data-model="flip"].active {
+      border-color: #00e1ff;
+      background: rgba(0, 225, 255, 0.26);
+      box-shadow: 0 0 22px rgba(0, 225, 255, 0.5);
+    }
 
-    /* Game Mode Selection (Combat vs Practice) */
+    /* Game Mode Selection (Combat vs Zombie vs Practice) */
     .mode-select-grid {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
       margin-bottom: 20px;
+    }
+    @media (max-width: 600px) {
+      .mode-select-grid {
+        grid-template-columns: 1fr;
+      }
     }
     .mode-select-btn {
       background: rgba(14, 25, 38, 0.9);
@@ -932,6 +1059,11 @@
       border-color: #00ffaa;
       background: rgba(0, 255, 170, 0.2);
       box-shadow: 0 0 20px rgba(0, 255, 170, 0.35);
+    }
+    .mode-select-btn.zombie.active {
+      border-color: #ff2244;
+      background: rgba(255, 34, 68, 0.24);
+      box-shadow: 0 0 22px rgba(255, 34, 68, 0.45);
     }
     .mode-select-btn.practice.active {
       border-color: #ffaa00;
@@ -1544,14 +1676,48 @@
     <div id="damage-dir-indicator"><div class="damage-dir-chevron"></div></div>
     <div id="pickup-toast"></div>
 
-    <!-- Tactical Sniper / Marksman Optical Scope Overlay (3.0X 拉近放大) -->
+    <!-- Tactical Sniper / Marksman Optical Scope Overlay (滑鼠滾輪自由縮放・點擊倍率切換・雙指捏合縮放) -->
     <div id="scope-overlay">
       <div class="scope-lens">
         <div class="scope-cross-h"></div>
         <div class="scope-cross-v"></div>
         <div class="scope-center-circle"></div>
         <div class="scope-center-dot"></div>
-        <div class="scope-tag" id="scope-tag">OPTICAL 27.1X // SNIPER SCOPE (滾輪調節特寫)</div>
+
+        <!-- Mil-dot Stadia Markings -->
+        <div class="scope-mildots-h" id="scope-mildots-h">
+          <div class="scope-mildot"></div><div class="scope-mildot"></div><div class="scope-mildot"></div><div class="scope-mildot"></div>
+          <div class="scope-mildot"></div><div class="scope-mildot"></div><div class="scope-mildot"></div><div class="scope-mildot"></div>
+        </div>
+        <div class="scope-mildots-v" id="scope-mildots-v">
+          <div class="scope-mildot"></div><div class="scope-mildot"></div><div class="scope-mildot"></div><div class="scope-mildot"></div>
+          <div class="scope-mildot"></div><div class="scope-mildot"></div><div class="scope-mildot"></div><div class="scope-mildot"></div>
+        </div>
+
+        <!-- Rangefinder & Tactical HUD -->
+        <div class="scope-rangefinder" id="scope-rangefinder">
+          <span>🎯</span>
+          <span id="scope-range-text">RANGE: --M</span>
+          <span class="range-mode" id="scope-target-status">[LOCK]</span>
+        </div>
+
+        <div class="scope-tag" id="scope-tag">OPTICAL 6.0X // TACTICAL SCOPE (🖱️ 滾輪 / 雙指捏合縮放)</div>
+
+        <!-- Interactive Quick Zoom Presets (點擊直接切換倍率，亦可滾輪微調) -->
+        <div class="scope-presets" id="scope-presets">
+          <button class="scope-preset-btn" data-mag="1.5">1.5X</button>
+          <button class="scope-preset-btn" data-mag="3.0">3.0X</button>
+          <button class="scope-preset-btn active" data-mag="6.0">6.0X</button>
+          <button class="scope-preset-btn" data-mag="12.0">12X</button>
+          <button class="scope-preset-btn" data-mag="24.0">24X</button>
+          <button class="scope-preset-btn" data-mag="60.0">60X</button>
+        </div>
+
+        <div class="scope-zoom-gauge">
+          <span>🖱️ 縮放</span>
+          <div class="scope-zoom-track"><div class="scope-zoom-fill" id="scope-zoom-fill"></div></div>
+          <span id="scope-zoom-val">6.0X</span>
+        </div>
       </div>
     </div>
 
@@ -1743,6 +1909,11 @@
             <span class="mode-select-name" style="color:#00ffaa">實戰突擊 (COMBAT)</span>
             <span class="mode-select-desc">巷戰肅清敵人・縱深推進交火</span>
           </button>
+          <button class="mode-select-btn zombie" id="btn-mode-zombie" data-gamemode="zombie">
+            <span class="mode-select-icon">🧟</span>
+            <span class="mode-select-name" style="color:#ff3355">喪屍狂潮 (ZOMBIE)</span>
+            <span class="mode-select-desc">人偶無限湧來・唯有爆頭才倒・被咬光血條結束</span>
+          </button>
           <button class="mode-select-btn practice" id="btn-mode-practice" data-gamemode="practice">
             <span class="mode-select-icon">🎯</span>
             <span class="mode-select-name" style="color:#ffaa00">練習靶場 (PRACTICE)</span>
@@ -1789,8 +1960,12 @@
           </button>
         </div>
 
-        <div class="section-label">敵軍人偶外觀 // ENEMY MODEL</div>
+        <div class="section-label">敵軍 / 喪屍 / 假人 3D 外觀 // TARGET 3D MODEL (VRM 自動正面朝向玩家)</div>
         <div class="enemy-model-grid">
+          <button class="enemy-model-btn" id="btn-model-dummy" data-model="dummy">
+            <span class="diff-name" style="color:#ffaa00">🎯 標靶假人</span>
+            <span class="diff-desc">橘白雙環・靶場經典</span>
+          </button>
           <button class="enemy-model-btn" id="btn-model-soldier" data-model="soldier">
             <span class="diff-name" style="color:#33aaff">🪖 戰術特戰兵</span>
             <span class="diff-desc">極速秒進・流暢 60FPS</span>
@@ -1805,7 +1980,11 @@
           </button>
           <button class="enemy-model-btn" id="btn-model-custom" data-model="custom">
             <span class="diff-name" style="color:#00ffaa">📂 自選模型</span>
-            <span class="diff-desc">上傳 .glb / .vrm</span>
+            <span class="diff-desc" id="custom-status-desc">上傳 .vrm / .glb</span>
+          </button>
+          <button class="enemy-model-btn" id="btn-model-flip" data-model="flip" title="點擊切換 180° 轉向（維持鎖定狀態，讓背對你的模型正面朝向你）">
+            <span class="diff-name flip-btn-title" style="color:#00e1ff">🔄 轉向 180°</span>
+            <span class="diff-desc flip-btn-desc" id="flip-status-desc">點擊開啟・維持轉向</span>
           </button>
         </div>
         <input type="file" id="custom-model-file-input" accept=".glb,.gltf,.vrm" style="display:none;">
@@ -1821,7 +2000,7 @@
           <div><span class="key-badge">WASD / 虛擬搖桿</span> 移動前進後退</div>
           <div><span class="key-badge">滑鼠 / 右側觸控</span> 旋轉視角與瞄準</div>
           <div><span class="key-badge">左鍵 / 🔥按鈕</span> 射擊開火 / 揮斬</div>
-          <div><span class="key-badge">右鍵 / 🎯按鈕</span> 機瞄瞄準 (ADS)</div>
+          <div><span class="key-badge">右鍵 + 滾輪</span> 瞄準鏡開鏡 & 滾輪縮放</div>
           <div><span class="key-badge">Shift / 搖桿推滿</span> 衝刺奔跑</div>
           <div><span class="key-badge">Space / ⬆️按鈕</span> 戰術跳躍 / 恢復站姿</div>
           <div><span class="key-badge">C / Z / 🚶按鈕</span> 蹲姿 / 伏進匍匐切換</div>
@@ -1829,7 +2008,7 @@
           <div><span class="key-badge">G / 💣按鈕</span> 投擲高爆手榴彈</div>
           <div><span class="key-badge">R / ⚡按鈕</span> 戰術彈藥裝填</div>
           <div><span class="key-badge">V / 👁️按鈕</span> FPS / TPS 視角切換</div>
-          <div><span class="key-badge">T / ☀️按鈕</span> 天候時間循環 (午/日/夜)</div>
+          <div><span class="key-badge">B / 🔄轉向</span> 翻轉 VRM 人偶 180° 朝向</div>
           <div style="grid-column: span 2; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 8px; color: #00e1ff; font-weight: bold;">
             <span class="key-badge" style="border-color: #00e1ff; color: #00e1ff;">iPad / 手機支援</span> 支援全螢幕觸控、虛擬搖桿、光劍滑動斬切與多點觸控！
           </div>
@@ -1850,6 +2029,7 @@
         <div class="section-label">調整模式 // GAME MODE</div>
         <div class="mode-select-grid" style="margin-bottom:14px;">
           <button class="mode-select-btn pause-mode active" data-gamemode="combat"><span class="mode-select-name" style="color:#00ffaa; font-size:14px;">⚔️ 戰地作戰</span></button>
+          <button class="mode-select-btn pause-mode zombie" data-gamemode="zombie"><span class="mode-select-name" style="color:#ff3355; font-size:14px;">🧟 喪屍狂潮</span></button>
           <button class="mode-select-btn pause-mode practice" data-gamemode="practice"><span class="mode-select-name" style="color:#ffaa00; font-size:14px;">🎯 靶場練習</span></button>
         </div>
 
@@ -1877,8 +2057,11 @@
           </button>
         </div>
 
-        <div class="section-label">調整敵軍外觀 // ENEMY MODEL</div>
+        <div class="section-label">調整敵軍 / 喪屍 / 假人 3D 外觀 // TARGET 3D MODEL</div>
         <div class="enemy-model-grid" style="margin-bottom:16px;">
+          <button class="enemy-model-btn pause-model" data-model="dummy">
+            <span class="diff-name" style="color:#ffaa00">🎯 標靶假人</span>
+          </button>
           <button class="enemy-model-btn pause-model" data-model="soldier">
             <span class="diff-name" style="color:#33aaff">🪖 戰術士兵</span>
           </button>
@@ -1890,6 +2073,10 @@
           </button>
           <button class="enemy-model-btn pause-model" data-model="custom">
             <span class="diff-name" style="color:#00ffaa">📂 自選模型</span>
+          </button>
+          <button class="enemy-model-btn pause-model" data-model="flip">
+            <span class="diff-name flip-btn-title" style="color:#00e1ff">🔄 轉向 180°</span>
+            <span class="diff-desc flip-btn-desc">點擊開啟</span>
           </button>
         </div>
 
@@ -1903,8 +2090,9 @@
     <!-- Game Over Modal -->
     <div class="modal-backdrop" id="gameover-modal">
       <div class="modal-box">
-        <div class="modal-title" style="color:#ff3344; text-shadow: 0 0 20px rgba(255,50,50,0.8);">陣亡 (K.I.A.)</div>
-        <div class="modal-subtitle">你在交火中倒下了。重新整裝再次突擊！</div>
+        <div class="modal-title" id="gameover-title" style="color:#ff3344; text-shadow: 0 0 20px rgba(255,50,50,0.8);">陣亡 (K.I.A.)</div>
+        <div class="modal-subtitle" id="gameover-subtitle">你在交火中倒下了。重新整裝再次突擊！</div>
+        <div id="gameover-stats" style="font-size:15px; color:#ffd0d8; margin-bottom:20px; line-height:1.8; display:none;"></div>
         <div class="action-btn-row start-btn-wrap">
           <button class="start-btn" id="retry-btn">重新突擊</button>
           <button class="sec-btn" id="god-retry-btn" style="border-color:#ffd700; color:#ffd700;">開啟無敵模式再戰</button>
@@ -2376,6 +2564,40 @@
         osc.stop(t + 0.09);
       }
 
+      playBulletWhiz() {
+        if (!this.inited) return;
+        const t = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const g = this.ctx.createGain();
+        osc.type = 'sine';
+        // Supersonic bullet doppler snap / whiz
+        osc.frequency.setValueAtTime(3200 + Math.random() * 800, t);
+        osc.frequency.exponentialRampToValueAtTime(750, t + 0.06);
+        g.gain.setValueAtTime(0.28, t);
+        g.gain.exponentialRampToValueAtTime(0.001, t + 0.07);
+        osc.connect(g);
+        g.connect(this.masterGain);
+        osc.start(t);
+        osc.stop(t + 0.075);
+      }
+
+      playRicochetMetal() {
+        if (!this.inited) return;
+        const t = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const g = this.ctx.createGain();
+        osc.type = 'triangle';
+        // High pitched metallic ricochet ping
+        osc.frequency.setValueAtTime(2200 + Math.random() * 600, t);
+        osc.frequency.exponentialRampToValueAtTime(3800, t + 0.08);
+        g.gain.setValueAtTime(0.35, t);
+        g.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
+        osc.connect(g);
+        g.connect(this.masterGain);
+        osc.start(t);
+        osc.stop(t + 0.13);
+      }
+
       playDismemberment() {
         if (!this.inited) return;
         const t = this.ctx.currentTime;
@@ -2589,6 +2811,57 @@
         ng.connect(this.masterGain);
         noise.start(t);
       }
+
+      playScopeZoomSound(zoomIn = true) {
+        if (!this.inited) return;
+        const t = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const g = this.ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(zoomIn ? 950 : 750, t);
+        osc.frequency.exponentialRampToValueAtTime(zoomIn ? 1350 : 520, t + 0.045);
+        g.gain.setValueAtTime(0.18, t);
+        g.gain.exponentialRampToValueAtTime(0.001, t + 0.05);
+        osc.connect(g);
+        g.connect(this.masterGain);
+        osc.start(t);
+        osc.stop(t + 0.055);
+      }
+
+      playZombieBite() {
+        if (!this.inited) return;
+        const t = this.ctx.currentTime;
+        // Visceral zombie snarl + flesh crunch
+        const osc = this.ctx.createOscillator();
+        const g = this.ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(165, t);
+        osc.frequency.exponentialRampToValueAtTime(55, t + 0.22);
+        g.gain.setValueAtTime(0.65, t);
+        g.gain.exponentialRampToValueAtTime(0.001, t + 0.24);
+        osc.connect(g);
+        g.connect(this.masterGain);
+        osc.start(t);
+        osc.stop(t + 0.25);
+
+        const bufferSize = Math.floor(this.ctx.sampleRate * 0.16);
+        const noiseBuffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+        const data = noiseBuffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.35));
+        const noise = this.ctx.createBufferSource();
+        noise.buffer = noiseBuffer;
+        const bp = this.ctx.createBiquadFilter();
+        bp.type = 'bandpass';
+        bp.frequency.setValueAtTime(1100, t);
+        bp.Q.setValueAtTime(1.8, t);
+        const ng = this.ctx.createGain();
+        ng.gain.setValueAtTime(0.7, t);
+        ng.gain.exponentialRampToValueAtTime(0.001, t + 0.16);
+        noise.connect(bp);
+        bp.connect(ng);
+        ng.connect(this.masterGain);
+        noise.start(t);
+      }
     }
     const audio = new ProceduralAudio();
 
@@ -2654,9 +2927,11 @@
       }
     };
     let currentDifficulty = 'normal';
-    let currentGameMode = 'combat'; // 'combat' or 'practice'
+    let currentGameMode = 'combat'; // 'combat', 'zombie', or 'practice'
     let practiceTargetsHit = 0;
     let practiceTargetsSliced = 0;
+    let zombieKills = 0;
+    let lastZombieBodyWarningTime = 0;
 
     // ----------------------------------------------------
     // TIME OF DAY & ENVIRONMENT PRESETS
@@ -3952,28 +4227,272 @@
     }
 
     // ----------------------------------------------------
-    // VFX: BULLET TRACERS, SPARKS & THICK LASER BEAMS
+    // 3D HIGH-VELOCITY FLYING BULLETS & HAIL OF BULLETS (子彈射出與槍林彈雨)
     // ----------------------------------------------------
-    const MAX_TRACERS = 40;
-    const tracerGeo = new THREE.BufferGeometry();
-    const tracerPositions = new Float32Array(MAX_TRACERS * 6);
-    tracerGeo.setAttribute('position', new THREE.BufferAttribute(tracerPositions, 3));
-    const tracerLines = new THREE.LineSegments(tracerGeo, new THREE.LineBasicMaterial({
-      color: 0xffbb44,
-      transparent: true,
-      opacity: 0.95
-    }));
-    scene.add(tracerLines);
+    const MAX_FLYING_BULLETS = 80;
+    const bulletMeshPool = [];
+    const activeFlyingBullets = [];
 
-    const activeTracers = [];
-    function spawnTracer(from, to, isEnemy = false) {
-      activeTracers.push({
-        current: from.clone(),
-        velocity: to.clone().sub(from).normalize().multiplyScalar(175),
-        life: 0.35,
-        target: to.clone(),
-        isEnemy
+    // Shared Geometries & Materials for high-performance 3D Bullets
+    const bulletHeadGeo = new THREE.CylinderGeometry(0.032, 0.032, 0.28, 8);
+    bulletHeadGeo.rotateX(Math.PI / 2); // Align with Z axis
+    const bulletTipGeo = new THREE.SphereGeometry(0.032, 8, 8);
+    bulletTipGeo.translate(0, 0, -0.14); // Position at front tip
+    const bulletMachConeGeo = new THREE.ConeGeometry(0.085, 0.55, 8);
+    bulletMachConeGeo.rotateX(-Math.PI / 2);
+    bulletMachConeGeo.translate(0, 0, 0.12); // Extends behind head
+    const bulletTrailGeo = new THREE.CylinderGeometry(0.014, 0.042, 2.8, 8);
+    bulletTrailGeo.rotateX(Math.PI / 2);
+    bulletTrailGeo.translate(0, 0, 1.45); // Trails behind bullet
+
+    for (let i = 0; i < MAX_FLYING_BULLETS; i++) {
+      const bGroup = new THREE.Group();
+
+      const coreMat = new THREE.MeshBasicMaterial({
+        color: 0xffffff,
+        transparent: true,
+        opacity: 1.0,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false
       });
+      const glowMat = new THREE.MeshBasicMaterial({
+        color: 0xffaa22,
+        transparent: true,
+        opacity: 0.88,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false
+      });
+      const machMat = new THREE.MeshBasicMaterial({
+        color: 0xffdd66,
+        transparent: true,
+        opacity: 0.42,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false
+      });
+
+      const headMesh = new THREE.Mesh(bulletHeadGeo, coreMat);
+      const tipMesh = new THREE.Mesh(bulletTipGeo, coreMat);
+      const machMesh = new THREE.Mesh(bulletMachConeGeo, machMat);
+      const trailMesh = new THREE.Mesh(bulletTrailGeo, glowMat);
+
+      bGroup.add(headMesh);
+      bGroup.add(tipMesh);
+      bGroup.add(machMesh);
+      bGroup.add(trailMesh);
+
+      bGroup.visible = false;
+      scene.add(bGroup);
+
+      bulletMeshPool.push({
+        group: bGroup,
+        headMesh,
+        tipMesh,
+        machMesh,
+        trailMesh,
+        coreMat,
+        glowMat,
+        machMat,
+        inUse: false
+      });
+    }
+
+    function spawnBullet(from, to, options = {}) {
+      let bItem = bulletMeshPool.find(b => !b.inUse);
+      if (!bItem) {
+        // Recycle oldest active bullet
+        if (activeFlyingBullets.length > 0) {
+          const oldest = activeFlyingBullets.shift();
+          bItem = oldest.item;
+        } else {
+          return;
+        }
+      }
+
+      bItem.inUse = true;
+      const group = bItem.group;
+      group.visible = true;
+      group.position.copy(from);
+
+      const dir = to.clone().sub(from);
+      const totalDist = dir.length();
+      if (totalDist > 0.001) dir.normalize();
+      else dir.set(0, 0, -1);
+
+      // Orient bullet along flight direction
+      group.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, -1), dir);
+
+      const isEnemy = !!options.isEnemy;
+      const type = options.type || (isEnemy ? 'enemy' : 'rifle');
+      let colorHex = options.colorHex || 0xffaa22;
+      let machHex = 0xffeebb;
+      let speed = options.speed || (isEnemy ? 165 : 210);
+
+      if (type === 'blaster') {
+        colorHex = 0x00f3ff;
+        machHex = 0x88ffff;
+        speed = 225;
+      } else if (isEnemy) {
+        colorHex = 0xff3322;
+        machHex = 0xff8866;
+        speed = 160;
+      }
+
+      bItem.glowMat.color.setHex(colorHex);
+      bItem.machMat.color.setHex(machHex);
+
+      activeFlyingBullets.push({
+        item: bItem,
+        currentPos: from.clone(),
+        dir: dir.clone(),
+        speed,
+        distTraveled: 0,
+        totalDist,
+        targetPoint: to.clone(),
+        isEnemy,
+        type,
+        hitData: options.hitData || null,
+        whizPlayed: false
+      });
+    }
+
+    // Maintain backward compatibility with spawnTracer
+    function spawnTracer(from, to, isEnemy = false) {
+      spawnBullet(from, to, {
+        isEnemy,
+        type: isEnemy ? 'enemy' : 'rifle',
+        colorHex: isEnemy ? 0xff3322 : 0xffbb44
+      });
+    }
+
+    // ----------------------------------------------------
+    // KINETIC BULLET ENTRY EFFECT (子彈射入鑽孔與衝擊特效)
+    // ----------------------------------------------------
+    const MAX_ENTRY_SHOCKWAVES = 30;
+    const entryShockwavePool = [];
+    const activeEntryShockwaves = [];
+    const shockwaveRingGeo = new THREE.RingGeometry(0.04, 0.10, 16);
+
+    for (let i = 0; i < MAX_ENTRY_SHOCKWAVES; i++) {
+      const ringMat = new THREE.MeshBasicMaterial({
+        color: 0xffcc44,
+        transparent: true,
+        opacity: 0.9,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+        side: THREE.DoubleSide
+      });
+      const ringMesh = new THREE.Mesh(shockwaveRingGeo, ringMat);
+      ringMesh.visible = false;
+      scene.add(ringMesh);
+      entryShockwavePool.push({ mesh: ringMesh, mat: ringMat, inUse: false });
+    }
+
+    function spawnBulletEntry(point, normal, hitData, isEnemy, type) {
+      const norm = normal ? normal.clone().normalize() : new THREE.Vector3(0, 1, 0);
+
+      // 1. Kinetic Entry Shockwave Ring expanding on surface plane
+      let sw = entryShockwavePool.find(s => !s.inUse);
+      if (sw) {
+        sw.inUse = true;
+        sw.mesh.visible = true;
+        sw.mesh.position.copy(point).addScaledVector(norm, 0.015);
+        sw.mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), norm);
+        sw.mesh.scale.set(0.5, 0.5, 0.5);
+        sw.mat.opacity = 0.92;
+        sw.mat.color.setHex(type === 'blaster' ? 0x00f3ff : (isEnemy ? 0xff4422 : 0xffcc44));
+        activeEntryShockwaves.push({ item: sw, life: 0.22, maxLife: 0.22 });
+      }
+
+      // 2. High-speed kinetic entry sparks & dust ejection
+      const sparkColor = type === 'blaster' ? 'cyan' : 'orange';
+      spawnSparks(point, 16, sparkColor);
+      spawnMuzzleSparks(point, norm, 10, sparkColor);
+
+      // 3. Apply Damage, Blood, Decal, and Sound based on hitData
+      if (hitData) {
+        const { enemyId, dummyId, barrelId, isHead, hitPoint, hitSubMesh, hitNormal, dir, config, diff } = hitData;
+
+        if (barrelId !== null && barrelId !== undefined) {
+          const barrelDmg = config.isEnergy ? 40 : 30;
+          barrelManager.damageBarrel(barrelId, barrelDmg, hitPoint);
+          showHitMarker(false);
+          audio.playRicochetMetal();
+        } else if (enemyId !== null && enemyId !== undefined) {
+          const enemy = enemyManager.enemies.find(e => e.id === enemyId);
+          if (enemy) {
+            if (enemy.alive) {
+              const damage = isHead ? config.headDamage : (diff && diff.isGod ? config.damage * 2.5 : config.damage);
+              enemyManager.damageEnemy(enemyId, damage, isHead, hitPoint, hitSubMesh, hitNormal, dir);
+              showHitMarker(isHead);
+            } else {
+              enemyManager.damageCorpse(enemy, hitPoint, hitNormal, dir, config.damage);
+              showHitMarker(false);
+            }
+          }
+        } else if (dummyId !== null && dummyId !== undefined) {
+          const dummy = trainingDummyManager.dummies.find(d => d.id === dummyId);
+          if (dummy) {
+            if (dummy.alive) {
+              const damage = isHead ? config.headDamage : config.damage;
+              trainingDummyManager.damageDummy(dummyId, damage, isHead, hitPoint, hitSubMesh, hitNormal, dir);
+              showHitMarker(isHead);
+            } else {
+              trainingDummyManager.damageCorpse(dummy, hitPoint, hitNormal, dir);
+              showHitMarker(false);
+            }
+          }
+        } else {
+          // Environmental Wall / Scenery Impact
+          if (hitNormal && hitPoint && hitSubMesh) {
+            attachBulletHoleToMesh(hitSubMesh, hitPoint, hitNormal, scene, 'metal');
+          }
+          audio.playRicochetMetal();
+        }
+      }
+    }
+
+    function updateFlyingBullets(delta) {
+      const camPos = camera.position;
+      for (let i = activeFlyingBullets.length - 1; i >= 0; i--) {
+        const b = activeFlyingBullets[i];
+        const step = b.speed * delta;
+        b.distTraveled += step;
+        b.currentPos.addScaledVector(b.dir, step);
+        b.item.group.position.copy(b.currentPos);
+
+        // Supersonic bullet flyby audio whiz when passing close to camera
+        if (!b.whizPlayed && b.isEnemy) {
+          const toCam = b.currentPos.clone().sub(camPos);
+          if (toCam.length() < 2.8) {
+            b.whizPlayed = true;
+            audio.playBulletWhiz();
+          }
+        }
+
+        // Bullet reached target point or traveled max distance
+        if (b.distTraveled >= b.totalDist) {
+          spawnBulletEntry(b.targetPoint, null, b.hitData, b.isEnemy, b.type);
+          b.item.group.visible = false;
+          b.item.inUse = false;
+          activeFlyingBullets.splice(i, 1);
+        }
+      }
+
+      // Update Kinetic Entry Shockwaves
+      for (let i = activeEntryShockwaves.length - 1; i >= 0; i--) {
+        const sw = activeEntryShockwaves[i];
+        sw.life -= delta;
+        const p = Math.max(0, sw.life / sw.maxLife);
+        const scale = 0.5 + (1.0 - p) * 3.2;
+        sw.item.mesh.scale.set(scale, scale, 1.0);
+        sw.item.mat.opacity = p * 0.92;
+
+        if (sw.life <= 0) {
+          sw.item.mesh.visible = false;
+          sw.item.inUse = false;
+          activeEntryShockwaves.splice(i, 1);
+        }
+      }
     }
 
     // Particle Sparks (Supports orange firearms sparks & cyan plasma sparks)
@@ -4031,14 +4550,16 @@
     }
 
     // ----------------------------------------------------
-    // 3D MUZZLE FLASH SYSTEM (槍口火花)
+    // 3D TACTICAL MUZZLE BRAKE FLAME SYSTEM (槍帽猛烈噴火特效)
+    // 包含中央主噴火巨舌 + 左右多孔制退器噴火翼 + 上揚抑跳火舌 + 高壓音爆火環 + 星芒爆閃
     // ----------------------------------------------------
-    function createMuzzleFlashMesh(colorHex = 0xffaa22) {
+    function createMuzzleFlashMesh(colorHex = 0xffaa22, weaponType = 'rifle') {
       const flashGroup = new THREE.Group();
+
       const flashMat = new THREE.MeshBasicMaterial({
         color: colorHex,
         transparent: true,
-        opacity: 0.95,
+        opacity: 0.96,
         blending: THREE.AdditiveBlending,
         depthWrite: false,
         side: THREE.DoubleSide
@@ -4048,11 +4569,69 @@
         transparent: true,
         opacity: 1.0,
         blending: THREE.AdditiveBlending,
-        depthWrite: false
+        depthWrite: false,
+        side: THREE.DoubleSide
+      });
+      const ringMat = new THREE.MeshBasicMaterial({
+        color: 0xffeedd,
+        transparent: true,
+        opacity: 0.88,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+        side: THREE.DoubleSide
       });
 
-      // 4-pointed cross star planes
-      const planeGeo = new THREE.PlaneGeometry(0.24, 0.24);
+      // 1. Central Roaring Flame Spear (中央主火舌，沿 -Z 前方猛烈噴射)
+      const spearGroup = new THREE.Group();
+      const spearOuterGeo = new THREE.ConeGeometry(0.082, 0.54, 8);
+      spearOuterGeo.rotateX(-Math.PI / 2);
+      spearOuterGeo.translate(0, 0, -0.27);
+      const spearOuter = new THREE.Mesh(spearOuterGeo, flashMat);
+      spearGroup.add(spearOuter);
+
+      const spearCoreGeo = new THREE.ConeGeometry(0.038, 0.36, 8);
+      spearCoreGeo.rotateX(-Math.PI / 2);
+      spearCoreGeo.translate(0, 0, -0.18);
+      const spearCore = new THREE.Mesh(spearCoreGeo, coreMat);
+      spearGroup.add(spearCore);
+      flashGroup.add(spearGroup);
+
+      // 2. Side Muzzle Brake Flame Jets (槍帽兩側孔噴火雙翼)
+      const sideJetsGroup = new THREE.Group();
+      const jetGeo = new THREE.ConeGeometry(0.046, 0.30, 8);
+      jetGeo.rotateX(-Math.PI / 2);
+      jetGeo.translate(0, 0, -0.15);
+
+      // Left Vent Jet (偏左 ~55°，微向上噴)
+      const leftJet = new THREE.Mesh(jetGeo, flashMat);
+      leftJet.rotation.y = Math.PI * 0.35;
+      leftJet.rotation.x = -Math.PI * 0.12;
+      leftJet.position.set(-0.024, 0.012, -0.05);
+      sideJetsGroup.add(leftJet);
+
+      // Right Vent Jet (偏右 ~55°，微向上噴)
+      const rightJet = new THREE.Mesh(jetGeo, flashMat);
+      rightJet.rotation.y = -Math.PI * 0.35;
+      rightJet.rotation.x = -Math.PI * 0.12;
+      rightJet.position.set(0.024, 0.012, -0.05);
+      sideJetsGroup.add(rightJet);
+
+      // Top Vent Jet (上方氣孔向上噴)
+      const topJet = new THREE.Mesh(jetGeo, flashMat);
+      topJet.rotation.x = -Math.PI * 0.30;
+      topJet.position.set(0, 0.026, -0.05);
+      sideJetsGroup.add(topJet);
+
+      flashGroup.add(sideJetsGroup);
+
+      // 3. Supersonic Shockwave Ring (槍帽口高壓音爆火環)
+      const ringGeo = new THREE.RingGeometry(0.065, 0.12, 16);
+      const ringMesh = new THREE.Mesh(ringGeo, ringMat);
+      ringMesh.position.set(0, 0, -0.08);
+      flashGroup.add(ringMesh);
+
+      // 4. Multi-pointed Starburst Cross Planes (星芒十字爆閃)
+      const planeGeo = new THREE.PlaneGeometry(0.38, 0.38);
       const p1 = new THREE.Mesh(planeGeo, flashMat);
       flashGroup.add(p1);
       const p2 = new THREE.Mesh(planeGeo, flashMat);
@@ -4062,21 +4641,39 @@
       p3.rotation.y = Math.PI / 2;
       flashGroup.add(p3);
 
-      const core = new THREE.Mesh(new THREE.SphereGeometry(0.045, 8, 8), coreMat);
+      // Center Incandescent Plasma Sphere
+      const core = new THREE.Mesh(new THREE.SphereGeometry(0.062, 8, 8), coreMat);
       flashGroup.add(core);
 
       flashGroup.visible = false;
-      flashGroup.userData = { life: 0 };
+      flashGroup.userData = {
+        life: 0,
+        maxLife: 0.075,
+        baseScale: 1.0,
+        ringMesh,
+        spearGroup,
+        sideJetsGroup,
+        flashMat,
+        coreMat,
+        ringMat
+      };
       return flashGroup;
     }
 
     function triggerMuzzleFlash(flashMesh, baseScale = 1.0) {
       if (!flashMesh) return;
       flashMesh.visible = true;
-      const s = baseScale * (1.1 + Math.random() * 0.6);
+      const s = baseScale * (1.18 + Math.random() * 0.62);
       flashMesh.scale.set(s, s, s);
       flashMesh.rotation.z = Math.random() * Math.PI * 2;
-      flashMesh.userData.life = 0.055; // 55ms flash duration
+      flashMesh.userData.life = 0.075; // 75ms flash duration
+      flashMesh.userData.maxLife = 0.075;
+      flashMesh.userData.baseScale = s;
+
+      if (flashMesh.userData.ringMesh) {
+        flashMesh.userData.ringMesh.scale.set(0.65, 0.65, 1.0);
+        flashMesh.userData.ringMat.opacity = 0.95;
+      }
     }
 
     function updateMuzzleFlash(flashMesh, delta) {
@@ -4085,7 +4682,23 @@
         if (flashMesh.userData.life <= 0) {
           flashMesh.visible = false;
         } else {
-          flashMesh.scale.multiplyScalar(0.92);
+          const p = Math.max(0, flashMesh.userData.life / flashMesh.userData.maxLife);
+          const ease = p * p;
+          if (flashMesh.userData.flashMat) flashMesh.userData.flashMat.opacity = 0.96 * ease;
+          if (flashMesh.userData.coreMat) flashMesh.userData.coreMat.opacity = ease;
+
+          // Expand supersonic shockwave ring
+          if (flashMesh.userData.ringMesh) {
+            const rScale = 0.7 + (1.0 - p) * 2.8;
+            flashMesh.userData.ringMesh.scale.set(rScale, rScale, 1.0);
+            flashMesh.userData.ringMat.opacity = 0.95 * ease;
+          }
+
+          // Flame spear dynamic jitter
+          if (flashMesh.userData.spearGroup) {
+            const jitterZ = 0.85 + Math.random() * 0.35;
+            flashMesh.userData.spearGroup.scale.set(1.0, 1.0, jitterZ);
+          }
         }
       }
     }
@@ -4770,6 +5383,16 @@
           if (e.mesh.visual) targets.push(e.mesh.visual);
         }
       }
+      if (typeof trainingDummyManager !== 'undefined') {
+        for (const d of trainingDummyManager.dummies) {
+          if (d.alive) {
+            targets.push(d.mesh.head);
+            targets.push(d.mesh.torso);
+            if (d.mesh.bodyCylinder) targets.push(d.mesh.bodyCylinder);
+            if (d.mesh.visual) targets.push(d.mesh.visual);
+          }
+        }
+      }
       for (const obs of sceneCollidables) {
         targets.push(obs);
       }
@@ -4814,21 +5437,58 @@
     // GLB / VRM CUSTOM ENEMY MODEL SYSTEM
     // ----------------------------------------------------
     let currentEnemyModelType = 'r18';
+    let isModelFlipped180 = false;
     try {
       const savedModel = localStorage.getItem('fps_enemy_model');
       if (savedModel) currentEnemyModelType = savedModel;
+      const savedFlip = localStorage.getItem('fps_model_flip_180');
+      if (savedFlip === '1') isModelFlipped180 = true;
     } catch (e) {}
     let cachedGlbData = null;
     let isGlbLoading = false;
     const DEFAULT_GLB_PATH = './assets/mint_swimsuit_animated-_neverness_to_everness.glb';
     const R18_GLB_PATH = './assets/adult-base-nude-woman/source/model.glb';
 
-    // Model cache for instant switching between soldier, glb, and r18
+    // Model cache for instant switching between soldier, glb, r18, and custom
     const modelCache = {
       glb: null,
       r18: null,
       custom: null
     };
+
+    // IndexedDB helper to persist uploaded .vrm / .glb across browser reloads
+    function openCustomModelDB() {
+      return new Promise((resolve, reject) => {
+        if (typeof indexedDB === 'undefined') return reject(new Error('No IndexedDB'));
+        const req = indexedDB.open('fps_custom_model_db', 1);
+        req.onupgradeneeded = (e) => {
+          const db = e.target.result;
+          if (!db.objectStoreNames.contains('models')) {
+            db.createObjectStore('models');
+          }
+        };
+        req.onsuccess = (e) => resolve(e.target.result);
+        req.onerror = (e) => reject(e.target.error);
+      });
+    }
+
+    function saveCustomModelToDB(file) {
+      openCustomModelDB().then((db) => {
+        const tx = db.transaction('models', 'readwrite');
+        tx.objectStore('models').put({ file, name: file.name }, 'last_custom_model');
+      }).catch(() => {});
+    }
+
+    function loadCustomModelFromDB() {
+      return openCustomModelDB().then((db) => {
+        return new Promise((resolve) => {
+          const tx = db.transaction('models', 'readonly');
+          const req = tx.objectStore('models').get('last_custom_model');
+          req.onsuccess = () => resolve(req.result || null);
+          req.onerror = () => resolve(null);
+        });
+      }).catch(() => null);
+    }
 
     let globalToastTimer = null;
     function showPickupToast(text, type = 'ammo') {
@@ -4842,14 +5502,33 @@
       }, 3500);
     }
 
-    function highlightModelButtons(mode) {
-      document.querySelectorAll('.enemy-model-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.getAttribute('data-model') === mode);
+    function syncFlipButtonsUI() {
+      document.querySelectorAll('.enemy-model-btn[data-model="flip"]').forEach(btn => {
+        btn.classList.toggle('active', isModelFlipped180);
+        const titleEl = btn.querySelector('.flip-btn-title');
+        const descEl = btn.querySelector('.flip-btn-desc');
+        if (titleEl) {
+          titleEl.innerText = isModelFlipped180 ? '✅ 已轉向 180°' : '🔄 轉向 180°';
+          titleEl.style.color = isModelFlipped180 ? '#00ffaa' : '#00e1ff';
+        }
+        if (descEl) {
+          descEl.innerText = isModelFlipped180 ? '已鎖定正面朝向你' : '點擊開啟・維持轉向';
+          descEl.style.color = isModelFlipped180 ? '#00ffaa' : '';
+        }
       });
     }
 
+    function highlightModelButtons(mode) {
+      document.querySelectorAll('.enemy-model-btn').forEach(btn => {
+        const m = btn.getAttribute('data-model');
+        if (m === 'flip') return; // Never clear the independent 180° flip toggle button!
+        btn.classList.toggle('active', m === mode);
+      });
+      syncFlipButtonsUI();
+    }
+
     function updateModelStatusUI(modelKey, statusText, isError = false) {
-      const descId = modelKey === 'r18' ? 'r18-status-desc' : 'glb-status-desc';
+      const descId = modelKey === 'r18' ? 'r18-status-desc' : (modelKey === 'custom' ? 'custom-status-desc' : 'glb-status-desc');
       const desc = document.getElementById(descId);
       if (desc) {
         desc.innerText = statusText;
@@ -4866,15 +5545,62 @@
       });
     }
 
-    function loadGlbEnemyModel(source, modelName = '泳裝 Mint', modelKey = 'glb', rotY = 0) {
-      if (modelCache[modelKey]) {
+    function applyFlipOrientationToActiveEntities() {
+      const targetRotY = isModelFlipped180 ? Math.PI : 0;
+      if (cachedGlbData) {
+        cachedGlbData.rotY = targetRotY;
+      }
+      if (typeof enemyManager !== 'undefined' && enemyManager.enemies) {
+        for (const e of enemyManager.enemies) {
+          if (e.mesh) {
+            if (e.mesh.orientWrapper) e.mesh.orientWrapper.rotation.y = targetRotY;
+            else if (e.mesh.visual) e.mesh.visual.rotation.y = targetRotY;
+            else if (e.mesh.pelvis) e.mesh.pelvis.rotation.y = targetRotY;
+          }
+        }
+      }
+      if (typeof trainingDummyManager !== 'undefined' && trainingDummyManager.dummies) {
+        for (const d of trainingDummyManager.dummies) {
+          if (d.mesh) {
+            if (d.mesh.orientWrapper) d.mesh.orientWrapper.rotation.y = targetFlipRotY();
+            else if (d.mesh.visual) d.mesh.visual.rotation.y = targetRotY;
+            else if (d.mesh.pelvis) d.mesh.pelvis.rotation.y = targetRotY;
+          }
+        }
+      }
+    }
+    function targetFlipRotY() {
+      return isModelFlipped180 ? Math.PI : 0;
+    }
+
+    function flipCurrentModelOrientation(forceValue = null) {
+      isModelFlipped180 = (forceValue !== null) ? !!forceValue : !isModelFlipped180;
+      try {
+        localStorage.setItem('fps_model_flip_180', isModelFlipped180 ? '1' : '0');
+      } catch (e) {}
+      syncFlipButtonsUI();
+      applyFlipOrientationToActiveEntities();
+      showPickupToast(
+        isModelFlipped180
+          ? '✅ 已鎖定【180° 轉向】！進入遊戲與場上人偶皆維持轉正面向你！'
+          : '🔄 已切回【0° 原始朝向】！',
+        'health'
+      );
+    }
+
+    function loadGlbEnemyModel(source, modelName = '泳裝 Mint', modelKey = 'glb', rotY = null, isVrmHint = false) {
+      if (modelCache[modelKey] && modelKey !== 'custom') {
         cachedGlbData = modelCache[modelKey];
         currentEnemyModelType = modelKey;
         updateModelStatusUI(modelKey, '已下載 (已套用)');
-        showPickupToast('🎯 敵軍外觀已套用: ' + modelName + '！', 'health');
+        showPickupToast('🎯 3D 外觀已套用: ' + modelName + '！', 'health');
         highlightModelButtons(modelKey);
-        if (gameState === 'PLAYING' && enemyManager && enemyManager.enemies.length > 0) {
-          enemyManager.spawnSectorEnemies(enemyManager.getAliveCount() || 8);
+        if (gameState === 'PLAYING' || gameState === 'PAUSED') {
+          if (currentGameMode === 'practice' && typeof trainingDummyManager !== 'undefined') {
+            trainingDummyManager.spawnDummies();
+          } else if (enemyManager && enemyManager.enemies.length > 0) {
+            enemyManager.spawnSectorEnemies(enemyManager.getAliveCount() || 8);
+          }
         }
         return;
       }
@@ -4885,7 +5611,7 @@
       }
       isGlbLoading = true;
       updateModelStatusUI(modelKey, '連接下載中 0%...');
-      showPickupToast('📦 正在下載 3D 模型 (' + modelName + ')...', 'ammo');
+      showPickupToast('📦 正在載入 3D 模型 (' + modelName + ')...', 'ammo');
 
       const loader = new GLTFLoader();
       loader.load(
@@ -4894,6 +5620,9 @@
           updateModelStatusUI(modelKey, '解析骨骼模型中...');
           // Compute bounding box strictly from visual meshes (ignoring auxiliary dummy bones)
           let minY = Infinity, maxY = -Infinity;
+          let boneFacesMinusZ = false;
+          let boneFacesPlusZ = false;
+
           gltf.scene.traverse((child) => {
             if (child.isMesh && child.geometry) {
               if (!child.geometry.boundingBox) child.geometry.computeBoundingBox();
@@ -4903,7 +5632,31 @@
                 maxY = Math.max(maxY, b.max.y);
               }
             }
+            const cname = (child.name || '').toLowerCase();
+            if (cname.includes('toebase') || cname === 'toe_l' || cname === 'toe_r' || cname.includes('lefttoebase')) {
+              if (child.position.z < -0.015) boneFacesMinusZ = true;
+              else if (child.position.z > 0.015) boneFacesPlusZ = true;
+            }
+            if (cname.includes('faceeye') || cname === 'lefteye' || cname === 'righteye') {
+              if (child.position.z < -0.005) boneFacesMinusZ = true;
+            }
           });
+
+          // VRM 0.x specification & VRoid models face -Z in local space; root.lookAt(player) points +Z at player.
+          const ext = gltf.parser && gltf.parser.json && gltf.parser.json.extensions;
+          const hasVrm0Ext = !!(ext && ext.VRM);
+          const hasVrm1Ext = !!(ext && ext.VRMC_vrm);
+          const isFacingMinusZ = boneFacesPlusZ ? false : (hasVrm0Ext || boneFacesMinusZ || (isVrmHint && !hasVrm1Ext));
+
+          // If a VRM (-Z front) model is loaded, automatically lock ON the 180° flip button so it stays lit & faces the player!
+          if (isFacingMinusZ && !isModelFlipped180) {
+            isModelFlipped180 = true;
+            try {
+              localStorage.setItem('fps_model_flip_180', '1');
+            } catch (e) {}
+          }
+          const finalRotY = isModelFlipped180 ? Math.PI : 0;
+
           const height = (maxY > minY) ? (maxY - minY) : 1.64;
           const targetHeight = 2.25;
           const scale = targetHeight / height;
@@ -4925,21 +5678,29 @@
             scale,
             yOffset,
             name: modelName,
-            rotY
+            rotY: finalRotY,
+            isVrm: hasVrm0Ext || hasVrm1Ext || isVrmHint
           };
           modelCache[modelKey] = glbEntry;
           cachedGlbData = glbEntry;
           isGlbLoading = false;
           currentEnemyModelType = modelKey;
-          updateModelStatusUI(modelKey, '已下載 (已套用)');
-          showPickupToast('🎯 敵軍 3D 模型載入成功: ' + modelName + ' (已套用)！', 'health');
+          try {
+            localStorage.setItem('fps_enemy_model', modelKey);
+          } catch (e) {}
+          updateModelStatusUI(modelKey, '已載入 (' + modelName + ')');
+          showPickupToast('🎯 3D 模型載入成功: ' + modelName + (isModelFlipped180 ? ' (已開啟 180° 正面朝向你)！' : '！'), 'health');
 
           highlightModelButtons(modelKey);
 
-          // Respawn enemies if in game
-          if (gameState === 'PLAYING' && enemyManager && enemyManager.enemies.length > 0) {
-            const alive = enemyManager.getAliveCount();
-            enemyManager.spawnSectorEnemies(alive || 8);
+          // Respawn enemies or practice dummies if in game
+          if (gameState === 'PLAYING' || gameState === 'PAUSED') {
+            if (currentGameMode === 'practice' && typeof trainingDummyManager !== 'undefined') {
+              trainingDummyManager.spawnDummies();
+            } else if (enemyManager && enemyManager.enemies.length > 0) {
+              const alive = enemyManager.getAliveCount();
+              enemyManager.spawnSectorEnemies(alive || 8);
+            }
           }
         },
         (xhr) => {
@@ -5034,14 +5795,35 @@
     function createEnemyGlbMesh(enemyId) {
       const root = new THREE.Group();
 
+      // Dedicated orientation wrapper so AnimationMixer on visual and lookAt on root NEVER overwrite the 180° flip!
+      const orientWrapper = new THREE.Group();
+      orientWrapper.rotation.y = isModelFlipped180 ? Math.PI : 0;
+      root.add(orientWrapper);
+
       // Visual cloned model
       const visual = SkeletonUtils.clone(cachedGlbData.scene);
       const s = cachedGlbData.scale || 1.1;
       visual.scale.set(s, s, s);
       visual.position.y = cachedGlbData.yOffset || 0;
-      // Model faces forward (-Z); with rotation.y = rotY it directly faces the player
-      visual.rotation.y = cachedGlbData.rotY || 0;
-      root.add(visual);
+      visual.rotation.y = 0;
+      orientWrapper.add(visual);
+
+      // Detect humanoid VRM / Mixamo bones for procedural walking & zombie arm posing when no animation clip exists
+      const vrmBones = {};
+      visual.traverse((node) => {
+        if (!node.name) return;
+        const n = node.name;
+        if (n === 'J_Bip_L_UpperArm' || /leftupperarm|upperarm_l/i.test(n)) vrmBones.lUpperArm = node;
+        else if (n === 'J_Bip_R_UpperArm' || /rightupperarm|upperarm_r/i.test(n)) vrmBones.rUpperArm = node;
+        else if (n === 'J_Bip_L_LowerArm' || /leftlowerarm|lowerarm_l/i.test(n)) vrmBones.lLowerArm = node;
+        else if (n === 'J_Bip_R_LowerArm' || /rightlowerarm|lowerarm_r/i.test(n)) vrmBones.rLowerArm = node;
+        else if (n === 'J_Bip_L_UpperLeg' || /leftupperleg|upperleg_l/i.test(n)) vrmBones.lUpperLeg = node;
+        else if (n === 'J_Bip_R_UpperLeg' || /rightupperleg|upperleg_r/i.test(n)) vrmBones.rUpperLeg = node;
+        else if (n === 'J_Bip_L_LowerLeg' || /leftlowerleg|lowerleg_l/i.test(n)) vrmBones.lLowerLeg = node;
+        else if (n === 'J_Bip_R_LowerLeg' || /rightlowerleg|lowerleg_r/i.test(n)) vrmBones.rLowerLeg = node;
+        else if (n === 'J_Bip_C_Head' || /^head$/i.test(n)) vrmBones.head = node;
+        else if (n === 'J_Bip_C_Spine' || /^spine$/i.test(n)) vrmBones.spine = node;
+      });
 
       // Skeletal animation mixer
       let mixer = null;
@@ -5051,14 +5833,29 @@
         const action = mixer.clipAction(clip);
         action.play();
         action.time = (enemyId * 4.3) % clip.duration; // De-synchronize enemy animations
+      } else if (vrmBones.lUpperArm && vrmBones.rUpperArm) {
+        // Pose T-pose VRM models naturally!
+        if (currentGameMode === 'zombie') {
+          // Zombie outstretched arms reaching forward toward the player
+          vrmBones.lUpperArm.rotation.set(0, -1.35, 0.22);
+          vrmBones.rUpperArm.rotation.set(0, 1.35, -0.22);
+          if (vrmBones.lLowerArm) vrmBones.lLowerArm.rotation.set(0, -0.2, 0);
+          if (vrmBones.rLowerArm) vrmBones.rLowerArm.rotation.set(0, 0.2, 0);
+        } else {
+          // Relaxed natural standing arms instead of stiff T-pose
+          vrmBones.lUpperArm.rotation.set(0, 0, 1.18);
+          vrmBones.rUpperArm.rotation.set(0, 0, -1.18);
+          if (vrmBones.lLowerArm) vrmBones.lLowerArm.rotation.set(0, -0.25, 0);
+          if (vrmBones.rLowerArm) vrmBones.rLowerArm.rotation.set(0, 0.25, 0);
+        }
       }
 
       // Generous Hitboxes for accurate raycasting, decals, and damage calculation (Scaled for 2.25m height)
       const hitMat = new THREE.MeshBasicMaterial({ visible: false });
 
       // Head Hitbox (1-shot headshot) - covers full anime head & hair
-      const head = new THREE.Mesh(new THREE.SphereGeometry(0.38, 10, 10), hitMat);
-      head.position.set(0, 1.95, 0);
+      const head = new THREE.Mesh(new THREE.SphereGeometry(0.42, 10, 10), hitMat);
+      head.position.set(0, 1.92, 0);
       root.add(head);
 
       // Torso Hitbox (3-shot kill) - covers chest & shoulders
@@ -5093,11 +5890,12 @@
       bodyCylinder.position.set(0, 1.12, 0);
       root.add(bodyCylinder);
 
-      // Tactical Assault Rifle held in front facing player (+Z)
+      // Tactical Assault Rifle held in front facing player (+Z) — hidden in Zombie & Practice modes!
       const rifle = createDetailedTacticalRifle();
       rifle.scale.set(1.22, 1.22, 1.22);
       rifle.position.set(-0.28, 1.42, 0.24);
       rifle.rotation.y = Math.PI;
+      rifle.visible = (currentGameMode === 'combat');
       root.add(rifle);
 
       const muzzle = new THREE.Object3D();
@@ -5106,15 +5904,18 @@
       muzzle.add(enemyFlash);
       root.add(muzzle);
 
-      // Also tag visual meshes in clone with enemyId
+      // Also tag visual meshes in clone with enemyId (and mark Face/Head/Hair meshes as headshots!)
       visual.traverse((child) => {
         if (child.isMesh) {
-          child.userData = { enemyId, isHead: false };
+          const mname = (child.name || (child.parent && child.parent.name) || '').toLowerCase();
+          const isFaceOrHair = mname.includes('face') || mname.includes('head') || mname.includes('hair') || mname.includes('eye');
+          child.userData = { enemyId, isHead: isFaceOrHair };
         }
       });
 
       return {
         root,
+        orientWrapper,
         pelvis,
         head,
         torso,
@@ -5129,6 +5930,7 @@
         muzzleFlash: enemyFlash,
         mixer,
         visual,
+        vrmBones,
         isGlb: true
       };
     }
@@ -5328,36 +6130,48 @@
       if (!parent || !worldPoint) return;
 
       let chosenMat = bulletMatClean;
-      let baseSize = 0.042 + Math.random() * 0.014; // 精緻小巧入彈孔 (~4.2cm - 5.6cm)，真實不誇張
+      let baseSize = 0.055 + Math.random() * 0.018; // 清晰立體入彈孔，遠近皆清楚可見
 
       if (decalType === 'metal') {
         chosenMat = bulletMatMetal;
-        baseSize = 0.046 + Math.random() * 0.016;
+        baseSize = 0.052 + Math.random() * 0.016;
       } else if (decalType === 'flesh') {
         chosenMat = bulletMatFlesh;
-        baseSize = 0.052 + Math.random() * 0.018; // 撕裂血肉創傷
+        baseSize = 0.068 + Math.random() * 0.022; // 撕裂血肉創傷彈孔
       } else {
-        // 智能分配：首發或一般中彈為逼真入彈孔，部分幾率為撕裂血肉
-        if (Math.random() < 0.28) {
+        // 智能分配：中彈時呈現逼真入彈孔與撕裂血肉彈孔
+        if (Math.random() < 0.45) {
           chosenMat = bulletMatFlesh;
-          baseSize = 0.048 + Math.random() * 0.015;
+          baseSize = 0.064 + Math.random() * 0.018;
         } else {
           chosenMat = bulletMatClean;
-          baseSize = 0.038 + Math.random() * 0.014;
+          baseSize = 0.052 + Math.random() * 0.016;
         }
       }
 
       const decalMesh = new THREE.Mesh(bulletDecalGeo, chosenMat);
       decalMesh.userData.isDecal = true;
+      decalMesh.renderOrder = 15;
       decalMesh.scale.set(baseSize, baseSize * (0.95 + Math.random() * 0.1), 1);
       decalMesh.rotation.z = Math.random() * Math.PI * 2;
 
       // Transform world coordinate into parent mesh's local coordinate
       const localPos = parent.worldToLocal(worldPoint.clone());
       const invQuat = parent.getWorldQuaternion(new THREE.Quaternion()).invert();
-      const localNormal = worldNormal ? worldNormal.clone().applyQuaternion(invQuat).normalize() : new THREE.Vector3(0, 0, 1);
+      let localNormal = worldNormal ? worldNormal.clone().applyQuaternion(invQuat).normalize() : new THREE.Vector3(0, 0, 1);
 
-      decalMesh.position.copy(localPos).addScaledVector(localNormal, 0.007);
+      // 若是打在角色或靶場假人身上 (非場景牆壁)，確保彈孔貼在朝向玩家的正面可見表層，不會被隱形碰撞盒或衣服模型吃掉
+      if (parent !== scene) {
+        if (localNormal.z < 0.15 && Math.abs(localNormal.y) < 0.85) {
+          localNormal.set(localNormal.x * 0.4, localNormal.y * 0.4, 0.92).normalize();
+        }
+        // 若命中點來自外圍透明碰撞體 (如 bodyCylinder z > 0.22)，自動貼合至 3D 模型正面肌膚/胸口表層
+        if (localPos.z > 0.22 && localPos.y > 0.25) {
+          localPos.z = 0.17 + Math.random() * 0.015;
+        }
+      }
+
+      decalMesh.position.copy(localPos).addScaledVector(localNormal, 0.012);
       if (Math.abs(localNormal.y) > 0.95) {
         decalMesh.up.set(0, 0, 1);
       } else {
@@ -5575,12 +6389,88 @@
     class EnemyManager {
       constructor() {
         this.enemies = [];
+        this.nextEnemyId = 0;
+        this.zombieSpawnCooldown = 0;
       }
 
       clearAll() {
         this.enemies.forEach(e => scene.remove(e.mesh.root));
         this.enemies = [];
+        this.nextEnemyId = 0;
         updateEnemyCounterHUD(0, 0);
+      }
+
+      createSingleEnemyAt(x, z, playerLookPos = new THREE.Vector3(0, 0, 5)) {
+        const diff = DIFFICULTIES[currentDifficulty];
+        const isGlbActive = (currentEnemyModelType !== 'soldier' && currentEnemyModelType !== 'dummy') && !!cachedGlbData;
+        const id = this.nextEnemyId++;
+
+        let meshData;
+        if (isGlbActive) {
+          meshData = createEnemyGlbMesh(id);
+        } else if (currentEnemyModelType === 'dummy') {
+          meshData = createTrainingDummyMesh();
+        } else {
+          meshData = createEnemySoldierMesh();
+        }
+
+        if (currentGameMode === 'zombie' && meshData.rifle) {
+          meshData.rifle.visible = false;
+        }
+
+        meshData.root.position.set(x, 0, z);
+        meshData.root.lookAt(new THREE.Vector3(playerLookPos.x, 0, playerLookPos.z));
+        scene.add(meshData.root);
+
+        // Tag sub-meshes for raycasting & decal attachment
+        meshData.head.userData = { enemyId: id, isHead: true, enemyObj: meshData };
+        meshData.torso.userData = { enemyId: id, isHead: false, enemyObj: meshData };
+        meshData.leftArm.userData = { enemyId: id, isHead: false, enemyObj: meshData };
+        meshData.rightArm.userData = { enemyId: id, isHead: false, enemyObj: meshData };
+        meshData.leftLeg.userData = { enemyId: id, isHead: false, enemyObj: meshData };
+        meshData.rightLeg.userData = { enemyId: id, isHead: false, enemyObj: meshData };
+        if (meshData.pelvis && meshData.pelvis !== meshData.root) {
+          meshData.pelvis.userData = { enemyId: id, isHead: false, enemyObj: meshData };
+        }
+        if (meshData.bodyCylinder) {
+          meshData.bodyCylinder.userData = { enemyId: id, isHead: false, enemyObj: meshData };
+        }
+        if (meshData.visual) {
+          meshData.visual.traverse(child => {
+            if (child.isMesh) {
+              const wasHead = !!(child.userData && child.userData.isHead);
+              child.userData = { enemyId: id, isHead: wasHead, enemyObj: meshData };
+            }
+          });
+        }
+        meshData.root.traverse(child => {
+          if (child.isMesh && !child.userData.isDecal && child.userData.enemyId === undefined) {
+            const isHeadPart = (child.parent === meshData.head);
+            child.userData = { enemyId: id, isHead: isHeadPart, enemyObj: meshData };
+          }
+        });
+
+        const enemyObj = {
+          id,
+          mesh: meshData,
+          hp: diff.enemyHp,
+          maxHp: diff.enemyHp,
+          alive: true,
+          isCorpse: false,
+          corpseDismembered: false,
+          state: currentGameMode === 'zombie' ? 'shooting' : 'patrol',
+          patrolDir: (Math.random() > 0.5 ? 1 : -1),
+          nextFireTime: 1.0 + Math.random() * 1.5,
+          reactionTime: currentGameMode === 'zombie' ? 0 : 0.7,
+          targetCoverX: x,
+          deathAnim: 0,
+          hitRecoil: 0,
+          biteCooldown: 0.25,
+          zombieSpeedMult: 0.85 + Math.random() * 0.45,
+          walkTimer: Math.random() * 10
+        };
+        this.enemies.push(enemyObj);
+        return enemyObj;
       }
 
       spawnSectorEnemies(count = 24) {
@@ -5596,62 +6486,48 @@
         ];
         const diff = DIFFICULTIES[currentDifficulty];
         let finalCount = count || diff.enemyCount || 24;
-        const isGlbActive = (currentEnemyModelType !== 'soldier') && !!cachedGlbData;
+        const isGlbActive = (currentEnemyModelType !== 'soldier' && currentEnemyModelType !== 'dummy') && !!cachedGlbData;
         if (isGlbActive) {
-          finalCount = Math.min(finalCount, 8); // Limit high-poly enemies to 8 to guarantee smooth 60 FPS
+          finalCount = Math.min(finalCount, currentGameMode === 'zombie' ? 10 : 8);
+        } else if (currentGameMode === 'zombie') {
+          finalCount = Math.min(finalCount, 18);
         }
+
+        const pPos = (typeof playerController !== 'undefined' && playerController) ? playerController.position : new THREE.Vector3(0, 0, 5);
 
         for (let i = 0; i < finalCount; i++) {
-          const meshData = isGlbActive
-            ? createEnemyGlbMesh(i)
-            : createEnemySoldierMesh();
-          const baseZ = spawnZLocations[i % spawnZLocations.length];
-          const z = baseZ - (Math.random() - 0.5) * 6;
-          const x = (Math.random() - 0.5) * 15;
-
-          meshData.root.position.set(x, 0, z);
-          meshData.root.lookAt(new THREE.Vector3(0, 0, 0));
-          scene.add(meshData.root);
-
-          // Tag sub-meshes for raycasting & decal attachment
-          meshData.head.userData = { enemyId: i, isHead: true, enemyObj: meshData };
-          meshData.torso.userData = { enemyId: i, isHead: false, enemyObj: meshData };
-          meshData.leftArm.userData = { enemyId: i, isHead: false, enemyObj: meshData };
-          meshData.rightArm.userData = { enemyId: i, isHead: false, enemyObj: meshData };
-          meshData.leftLeg.userData = { enemyId: i, isHead: false, enemyObj: meshData };
-          meshData.rightLeg.userData = { enemyId: i, isHead: false, enemyObj: meshData };
-          if (meshData.pelvis && meshData.pelvis !== meshData.root) {
-            meshData.pelvis.userData = { enemyId: i, isHead: false, enemyObj: meshData };
+          let z, x;
+          if (currentGameMode === 'zombie') {
+            // In Zombie Mode, spawn initial horde 15m ~ 68m ahead of the player so they immediately swarm in!
+            z = pPos.z - (15 + i * 4.5 + Math.random() * 6);
+            x = (Math.random() - 0.5) * 18;
+          } else {
+            const baseZ = spawnZLocations[i % spawnZLocations.length];
+            z = baseZ - (Math.random() - 0.5) * 6;
+            x = (Math.random() - 0.5) * 15;
           }
-          if (meshData.bodyCylinder) {
-            meshData.bodyCylinder.userData = { enemyId: i, isHead: false, enemyObj: meshData };
-          }
-          if (meshData.visual) {
-            meshData.visual.traverse(child => {
-              if (child.isMesh) {
-                child.userData = { enemyId: i, isHead: false, enemyObj: meshData };
-              }
-            });
-          }
-
-          this.enemies.push({
-            id: i,
-            mesh: meshData,
-            hp: diff.enemyHp,
-            maxHp: diff.enemyHp,
-            alive: true,
-            isCorpse: false,
-            corpseDismembered: false,
-            state: 'patrol',
-            patrolDir: (Math.random() > 0.5 ? 1 : -1),
-            nextFireTime: 1.0 + Math.random() * 1.5,
-            reactionTime: 0.7,
-            targetCoverX: x,
-            deathAnim: 0,
-            walkTimer: Math.random() * 10
-          });
+          this.createSingleEnemyAt(x, z, pPos);
         }
         updateEnemyCounterHUD(this.getAliveCount(), finalCount);
+      }
+
+      spawnZombieReinforcement(playerPos) {
+        const pPos = playerPos || new THREE.Vector3(0, 0, 5);
+        // Cleanup oldest corpse if more than 16 corpses are on the ground in endless mode to keep 60 FPS
+        const corpses = this.enemies.filter(e => !e.alive);
+        if (corpses.length > 16) {
+          const oldest = corpses[0];
+          scene.remove(oldest.mesh.root);
+          const idx = this.enemies.indexOf(oldest);
+          if (idx !== -1) this.enemies.splice(idx, 1);
+        }
+
+        // Spawn 20m ~ 46m ahead of player (or in front arc) within street width
+        const dist = 20 + Math.random() * 26;
+        const x = (Math.random() - 0.5) * 20;
+        const z = Math.max(-755, Math.min(14, pPos.z - dist));
+        this.createSingleEnemyAt(x, z, pPos);
+        updateEnemyCounterHUD(this.getAliveCount(), this.getAliveCount());
       }
 
       getAliveCount() {
@@ -5662,27 +6538,53 @@
         const enemy = this.enemies.find(e => e.id === enemyId);
         if (!enemy || !enemy.alive) return;
 
-        // 核心規則：打到頭一次斃命；打中身體被子彈打到三次才會死
-        if (isHeadshot) {
-          enemy.hp = 0; // 精準爆頭 1 發斃命！
-        } else if (amount >= 300) {
-          enemy.hp = 0; // 重型破甲火箭 / 高爆物一擊必殺
+        const effectPos = hitPoint || enemy.mesh.root.position.clone().add(new THREE.Vector3(0, 1.4, 0));
+        const shotDir = bulletDir || new THREE.Vector3(0, 0, -1);
+
+        if (currentGameMode === 'zombie') {
+          // 喪屍模式核心規則：只有打頭 (爆頭) 才會倒地！打身體不會死！
+          if (isHeadshot) {
+            enemy.hp = 0; // 爆頭一擊倒地！
+            zombieKills++;
+          } else {
+            enemy.hp = enemy.maxHp; // 打身體不扣致死血量，僅產生彈孔、噴血與微幅擊退僵直
+            enemy.hitRecoil = 0.18;
+            enemy.mesh.root.position.x += shotDir.x * 0.22;
+            enemy.mesh.root.position.z += shotDir.z * 0.22;
+            enemy.mesh.root.position.x = Math.max(-13.5, Math.min(13.5, enemy.mesh.root.position.x));
+            const now = performance.now();
+            if (now - lastZombieBodyWarningTime > 1300) {
+              lastZombieBodyWarningTime = now;
+              addKillFeed('⚠️ 喪屍模式：打身體無效！只有【瞄準頭部】爆頭才會倒地！');
+            }
+          }
         } else {
-          // 常規槍彈射擊身體：每次剛好扣除 1/3 最大血量，精準 3 發消滅！
-          const damagePerHit = Math.ceil(enemy.maxHp / 3.0);
-          enemy.hp = Math.max(0, enemy.hp - damagePerHit);
+          // 常規作戰核心規則：打到頭一次斃命；打中身體被子彈打到三次才會死
+          if (isHeadshot) {
+            enemy.hp = 0; // 精準爆頭 1 發斃命！
+          } else if (amount >= 300) {
+            enemy.hp = 0; // 重型破甲火箭 / 高爆物一擊必殺
+          } else {
+            // 常規槍彈射擊身體：每次剛好扣除 1/3 最大血量，精準 3 發消滅！
+            const damagePerHit = Math.ceil(enemy.maxHp / 3.0);
+            enemy.hp = Math.max(0, enemy.hp - damagePerHit);
+          }
         }
 
         enemy.state = 'shooting';
         audio.playHitSound(isHeadshot);
 
         // Visual bullet hit effects: Bullet Hole Decal & Blood Splatter
-        const effectPos = hitPoint || enemy.mesh.root.position.clone().add(new THREE.Vector3(0, 1.4, 0));
-        const shotDir = bulletDir || new THREE.Vector3(0, 0, -1);
-
-        if (hitPoint) {
-          attachBulletHoleToMesh(hitObject, effectPos, hitNormal, enemy.mesh.root, isHeadshot ? 'flesh' : 'auto');
+        let surfaceNormal = hitNormal ? hitNormal.clone() : shotDir.clone().negate();
+        if (hitObject && hitObject.matrixWorld) {
+          const normalMat = new THREE.Matrix3().getNormalMatrix(hitObject.matrixWorld);
+          surfaceNormal.applyMatrix3(normalMat).normalize();
         }
+        if (surfaceNormal.dot(shotDir) > 0) {
+          surfaceNormal.negate();
+        }
+
+        attachBulletHoleToMesh(hitObject, effectPos, surfaceNormal, enemy.mesh.root, isHeadshot ? 'flesh' : 'auto');
         spawnBloodSplatter(effectPos, shotDir, isHeadshot ? 34 : 24);
         spawnGroundBloodStain(effectPos.x, effectPos.z, 0.45);
 
@@ -5705,8 +6607,13 @@
         const effectPos = hitPoint || enemy.mesh.root.position.clone().add(new THREE.Vector3(0, 0.15, 0));
         const shotDir = bulletDir || new THREE.Vector3(0, -1, 0);
 
+        let surfaceNormal = hitNormal ? hitNormal.clone() : new THREE.Vector3(0, 1, 0);
+        if (surfaceNormal.dot(shotDir) > 0) {
+          surfaceNormal.negate();
+        }
+
         audio.playFleshHit();
-        attachBulletHoleToMesh(null, effectPos, hitNormal || new THREE.Vector3(0, 1, 0), enemy.mesh.root, 'flesh');
+        attachBulletHoleToMesh(null, effectPos, surfaceNormal, enemy.mesh.root, 'flesh');
 
         const bloodIntensity = Math.min(50, 24 + enemy.corpseHits * 2);
         spawnBloodSplatter(effectPos, shotDir.clone().negate().add(new THREE.Vector3(0, 2, 0)), bloodIntensity);
@@ -5728,6 +6635,16 @@
 
       handleEnemyDeath(enemy, isHeadshot, shotDir, effectPos) {
         audio.playDeathSound();
+        if (currentGameMode === 'zombie') {
+          addKillFeed(`🧟💥 精準爆頭擊倒喪屍！(累計爆頭: ${zombieKills} 隻)`);
+          updateHUD();
+          // Immediately spawn a new zombie ahead so the horde never stops swarming!
+          if (typeof playerController !== 'undefined' && playerController) {
+            this.spawnZombieReinforcement(playerController.position);
+          }
+          return;
+        }
+
         if (isHeadshot) {
           addKillFeed('🎯 精準爆頭 (1發致命！)');
         } else {
@@ -5765,6 +6682,18 @@
 
       update(delta, playerPos) {
         const diff = DIFFICULTIES[currentDifficulty];
+        const isZombieMode = (currentGameMode === 'zombie');
+
+        // In Zombie Mode, continuously spawn reinforcements so zombies endlessly swarm the player
+        if (isZombieMode) {
+          this.zombieSpawnCooldown = (this.zombieSpawnCooldown || 0) - delta;
+          const isGlbActive = (currentEnemyModelType !== 'soldier' && currentEnemyModelType !== 'dummy') && !!cachedGlbData;
+          const maxActiveZombies = isGlbActive ? 10 : 18;
+          if (this.zombieSpawnCooldown <= 0 && this.getAliveCount() < maxActiveZombies) {
+            this.zombieSpawnCooldown = 1.35;
+            this.spawnZombieReinforcement(playerPos);
+          }
+        }
 
         for (const e of this.enemies) {
           if (e.mesh.mixer && e.alive) {
@@ -5774,24 +6703,45 @@
             if (e.mesh.mixer) {
               e.mesh.mixer.timeScale = 0; // 死亡時骨骼動畫停止
             }
+            // 向後倒下 (-Math.PI / 2)：繞 X 軸負向旋轉才是真正的向後仰倒！
             if ((e.deathAnim || 0) < 1) {
-              e.deathAnim = (e.deathAnim || 0) + delta * 3.5;
-              e.mesh.root.rotation.x = Math.min(Math.PI / 2, e.mesh.root.rotation.x + delta * 4.2);
-              e.mesh.root.position.y = Math.max(0.12, e.mesh.root.position.y - delta * 2.2);
+              e.deathAnim = Math.min(1, (e.deathAnim || 0) + delta * 3.8);
+              const easeOut = 1 - Math.pow(1 - e.deathAnim, 2);
+              e.mesh.root.rotation.x = THREE.MathUtils.lerp(0, -Math.PI / 2, easeOut);
+              e.mesh.root.position.y = THREE.MathUtils.lerp(0, 0.14, easeOut);
             }
             // 屍體牢固貼在地面上，絕不消失
-            e.mesh.root.position.y = Math.max(0.08, Math.min(0.22, e.mesh.root.position.y));
+            e.mesh.root.position.y = Math.max(0.08, Math.min(0.24, e.mesh.root.position.y));
             e.mesh.root.visible = true;
             continue;
+          }
+
+          // Enforce VRM / GLB / procedural facing orientation toward the player (+Z of root)
+          const targetFlipY = isModelFlipped180 ? Math.PI : 0;
+          if (e.mesh.orientWrapper) {
+            e.mesh.orientWrapper.rotation.y = targetFlipY;
+          } else if (e.mesh.visual) {
+            e.mesh.visual.rotation.y = targetFlipY;
+          } else if (e.mesh.pelvis) {
+            e.mesh.pelvis.rotation.y = targetFlipY;
           }
 
           // Always orient alive enemies directly facing player's current position (regardless of distance)
           const lookTarget = new THREE.Vector3(playerPos.x, e.mesh.root.position.y, playerPos.z);
           e.mesh.root.lookAt(lookTarget);
 
+          // Apply body-shot recoil flinch if any
+          if (e.hitRecoil > 0) {
+            e.hitRecoil = Math.max(0, e.hitRecoil - delta * 0.9);
+            e.mesh.root.rotation.x -= e.hitRecoil;
+          }
+
           const distToPlayer = e.mesh.root.position.distanceTo(playerPos);
 
-          if (distToPlayer < 65) {
+          if (isZombieMode) {
+            e.state = 'shooting'; // Zombies always swarm relentlessly from any distance
+            if (e.mesh.rifle) e.mesh.rifle.visible = false;
+          } else if (distToPlayer < 65) {
             if (e.state !== 'shooting') {
               e.state = 'shooting';
               e.reactionTime = 0.5 + Math.random() * 0.3; // Brief reaction delay
@@ -5799,7 +6749,7 @@
           }
 
           if (e.state === 'shooting') {
-            // ADVANCING TACTICAL AI: Enemies actively advance forward towards player's position!
+            // ADVANCING TACTICAL / ZOMBIE AI: Actively advance forward towards player's position!
             const dx = playerPos.x - e.mesh.root.position.x;
             const dz = playerPos.z - e.mesh.root.position.z;
             const distXZ = Math.hypot(dx, dz);
@@ -5807,13 +6757,16 @@
             // Close-quarters standoff threshold: enemies advance all the way into 0.58m face-to-face range!
             const closeCombatStandoff = 0.58;
             if (distXZ > closeCombatStandoff) {
-              if (e.mesh.mixer) e.mesh.mixer.timeScale = 1.35;
-              const advSpeed = (diff.advanceSpeed || 2.4) * (currentDifficulty === 'hard' ? 1.25 : 1.1);
+              if (e.mesh.mixer) e.mesh.mixer.timeScale = isZombieMode ? 1.55 : 1.35;
+              const baseAdv = (diff.advanceSpeed || 2.4) * (currentDifficulty === 'hard' ? 1.25 : 1.1);
+              const advSpeed = isZombieMode ? (baseAdv * 1.45 * (e.zombieSpeedMult || 1.0)) : baseAdv;
               const dirX = dx / distXZ;
               const dirZ = dz / distXZ;
 
-              // At long range, slight tactical lateral strafe; at close quarters, advance straight into player
-              const strafeWeight = distXZ > 4.0 ? 0.35 : (distXZ > 2.0 ? 0.15 : 0.0);
+              // At long range, slight lateral weave; at close quarters, rush straight into player
+              const strafeWeight = isZombieMode
+                ? (distXZ > 3.0 ? Math.sin(e.walkTimer * 0.4) * 0.18 : 0.0)
+                : (distXZ > 4.0 ? 0.35 : (distXZ > 2.0 ? 0.15 : 0.0));
               let moveX = dirX + e.patrolDir * strafeWeight;
               let moveZ = dirZ;
               const moveLen = Math.hypot(moveX, moveZ) || 1;
@@ -5824,16 +6777,36 @@
               // Street width clamp
               e.mesh.root.position.x = Math.max(-13.5, Math.min(13.5, e.mesh.root.position.x));
 
-              // Animate running legs
-              e.walkTimer = (e.walkTimer || 0) + delta * 9;
-              if (e.mesh.leftLeg && e.mesh.rightLeg) {
+              // Animate running legs & zombie arms (for both procedural meshes and VRM humanoid skeletons!)
+              e.walkTimer = (e.walkTimer || 0) + delta * (isZombieMode ? 10.5 : 9);
+              if (e.mesh.leftLeg && e.mesh.rightLeg && !e.mesh.isGlb) {
                 e.mesh.leftLeg.rotation.x = Math.sin(e.walkTimer) * 0.45;
                 e.mesh.rightLeg.rotation.x = -Math.sin(e.walkTimer) * 0.45;
+                if (isZombieMode && e.mesh.leftArm && e.mesh.rightArm) {
+                  e.mesh.leftArm.rotation.x = -1.35 + Math.sin(e.walkTimer * 0.7) * 0.18;
+                  e.mesh.rightArm.rotation.x = -1.35 - Math.sin(e.walkTimer * 0.7) * 0.18;
+                }
+              }
+              if (e.mesh.vrmBones && !e.mesh.mixer) {
+                const vb = e.mesh.vrmBones;
+                if (vb.lUpperLeg && vb.rUpperLeg) {
+                  vb.lUpperLeg.rotation.x = Math.sin(e.walkTimer) * 0.48;
+                  vb.rUpperLeg.rotation.x = -Math.sin(e.walkTimer) * 0.48;
+                }
+                if (vb.lLowerLeg && vb.rLowerLeg) {
+                  vb.lLowerLeg.rotation.x = -Math.max(0, Math.sin(e.walkTimer)) * 0.42;
+                  vb.rLowerLeg.rotation.x = -Math.max(0, -Math.sin(e.walkTimer)) * 0.42;
+                }
+                if (isZombieMode && vb.lUpperArm && vb.rUpperArm) {
+                  vb.lUpperArm.rotation.set(Math.sin(e.walkTimer * 0.6) * 0.15, -1.35, 0.20 + Math.cos(e.walkTimer * 0.5) * 0.1);
+                  vb.rUpperArm.rotation.set(-Math.sin(e.walkTimer * 0.6) * 0.15, 1.35, -0.20 - Math.cos(e.walkTimer * 0.5) * 0.1);
+                  if (vb.head) vb.head.rotation.z = Math.sin(e.walkTimer * 0.45) * 0.14;
+                }
               }
             } else {
               if (e.mesh.mixer) e.mesh.mixer.timeScale = 0.95;
               // Reset leg position when in point-blank close combat standoff
-              if (e.mesh.leftLeg && e.mesh.rightLeg) {
+              if (e.mesh.leftLeg && e.mesh.rightLeg && !e.mesh.isGlb) {
                 e.mesh.leftLeg.rotation.x = 0;
                 e.mesh.rightLeg.rotation.x = 0;
               }
@@ -5859,13 +6832,33 @@
               }
             }
 
+            if (isZombieMode) {
+              // ZOMBIE BITE ATTACK: When zombie gets within 1.42m of player, it bites and drains player's HP bar!
+              if (distXZ <= 1.42) {
+                e.biteCooldown = (e.biteCooldown || 0) - delta;
+                if (e.biteCooldown <= 0) {
+                  e.biteCooldown = 0.68;
+                  const biteDmg = currentDifficulty === 'easy' ? 12 : (currentDifficulty === 'hard' ? 24 : 16);
+                  audio.playZombieBite();
+                  if (typeof playerController !== 'undefined' && playerController) {
+                    // Lunge forward slightly when biting
+                    e.mesh.root.rotation.x = 0.24;
+                    playerController.recoilPitch += (Math.random() - 0.5) * 0.09;
+                    playerController.takeDamage(biteDmg, e.mesh.root.position, true);
+                    addKillFeed(`🧟 慘遭喪屍撕咬！(-${biteDmg} HP)`);
+                  }
+                }
+              }
+              continue;
+            }
+
             // Reaction delay when first spotting player
             if (e.reactionTime > 0) {
               e.reactionTime -= delta;
               continue;
             }
 
-            // AI Firing Logic
+            // AI Firing Logic (Combat Mode only)
             e.nextFireTime -= delta;
             if (e.nextFireTime <= 0) {
               e.nextFireTime = diff.enemyFireDelay + Math.random() * 0.7;
@@ -6048,10 +7041,11 @@
     const playerSoldierModel = createPlayerCharacterMesh();
 
     // ----------------------------------------------------
-    // TACTICAL TRAINING DUMMY MANAGER (練習模式靜止靶人系統)
+    // TACTICAL TRAINING DUMMY MANAGER (練習模式靜止靶人系統 - 支援切換所有 3D 模型、向後倒下與擬真彈孔)
     // ----------------------------------------------------
     function createTrainingDummyMesh() {
       const dummy = new THREE.Group();
+      dummy.scale.set(1.22, 1.22, 1.22);
       const frameMat = new THREE.MeshStandardMaterial({ color: 0xdae2eb, roughness: 0.45, metalness: 0.2 });
       const orangeMat = new THREE.MeshStandardMaterial({ color: 0xff6600, roughness: 0.4, metalness: 0.1 });
       const metalBaseMat = new THREE.MeshStandardMaterial({ color: 0x222a35, roughness: 0.6, metalness: 0.7 });
@@ -6166,18 +7160,51 @@
           { x: 3.5, z: -308 }
         ];
 
+        const isGlbActive = (currentEnemyModelType !== 'soldier' && currentEnemyModelType !== 'dummy') && !!cachedGlbData;
+
         spawnCoords.forEach((coord, i) => {
-          const meshData = createTrainingDummyMesh();
+          let meshData;
+          if (isGlbActive) {
+            meshData = createEnemyGlbMesh(i);
+            // 靶場練習假人不需開火，隱藏手上的步槍讓 3D 模型完整無遮擋展示
+            if (meshData.rifle) meshData.rifle.visible = false;
+          } else if (currentEnemyModelType === 'soldier') {
+            meshData = createEnemySoldierMesh();
+          } else {
+            meshData = createTrainingDummyMesh();
+          }
+
           meshData.root.position.set(coord.x, 0, coord.z);
+          meshData.root.lookAt(new THREE.Vector3(0, 0, 5));
           scene.add(meshData.root);
 
-          // Tag sub-meshes for raycasting & decal attachment
+          // Tag all sub-meshes & visual GLB meshes for raycasting & decal attachment
           meshData.head.userData = { dummyId: i, isHead: true, dummyObj: meshData };
           meshData.torso.userData = { dummyId: i, isHead: false, dummyObj: meshData };
           meshData.leftArm.userData = { dummyId: i, isHead: false, dummyObj: meshData };
           meshData.rightArm.userData = { dummyId: i, isHead: false, dummyObj: meshData };
           meshData.leftLeg.userData = { dummyId: i, isHead: false, dummyObj: meshData };
           meshData.rightLeg.userData = { dummyId: i, isHead: false, dummyObj: meshData };
+          if (meshData.pelvis && meshData.pelvis !== meshData.root) {
+            meshData.pelvis.userData = { dummyId: i, isHead: false, dummyObj: meshData };
+          }
+          if (meshData.bodyCylinder) {
+            meshData.bodyCylinder.userData = { dummyId: i, isHead: false, dummyObj: meshData };
+          }
+          if (meshData.visual) {
+            meshData.visual.traverse(child => {
+              if (child.isMesh) {
+                const wasHead = !!(child.userData && child.userData.isHead);
+                child.userData = { dummyId: i, isHead: wasHead, dummyObj: meshData };
+              }
+            });
+          }
+          meshData.root.traverse(child => {
+            if (child.isMesh && !child.userData.isDecal && child.userData.dummyId === undefined) {
+              const isHeadPart = (child.parent === meshData.head);
+              child.userData = { dummyId: i, isHead: isHeadPart, dummyObj: meshData };
+            }
+          });
 
           this.dummies.push({
             id: i,
@@ -6186,9 +7213,17 @@
             hp: 100,
             maxHp: 100,
             alive: true,
+            isCorpse: false,
+            corpseHits: 0,
+            deathAnim: 0,
+            hitRecoil: 0,
             respawnTimer: 0
           });
         });
+
+        if (typeof updateEnemyCounterHUD === 'function') {
+          updateEnemyCounterHUD(this.dummies.filter(d => d.alive).length, this.dummies.length);
+        }
       }
 
       clearAll() {
@@ -6216,12 +7251,24 @@
         const effectPos = hitPoint || dummy.mesh.root.position.clone().add(new THREE.Vector3(0, 1.4, 0));
         const shotDir = bulletDir || new THREE.Vector3(0, 0, -1);
 
-        if (hitPoint) {
-          attachBulletHoleToMesh(hitObject, effectPos, hitNormal, dummy.mesh.root, isHeadshot ? 'flesh' : 'auto');
+        // 表面法線：若命中隱形碰撞體則計算朝向玩家的真實法線，確保彈孔貼在正面可見位置
+        let surfaceNormal = hitNormal ? hitNormal.clone() : shotDir.clone().negate();
+        if (hitObject && hitObject.matrixWorld) {
+          const normalMat = new THREE.Matrix3().getNormalMatrix(hitObject.matrixWorld);
+          surfaceNormal.applyMatrix3(normalMat).normalize();
         }
+        // 確保彈孔永遠朝向射擊來的方向 (正面可見)
+        if (surfaceNormal.dot(shotDir) > 0) {
+          surfaceNormal.negate();
+        }
+
+        attachBulletHoleToMesh(hitObject, effectPos, surfaceNormal, dummy.mesh.root, isHeadshot ? 'flesh' : 'auto');
         spawnSparks(effectPos, isHeadshot ? 24 : 16, 'orange');
-        spawnBloodSplatter(effectPos, shotDir, 20);
+        spawnBloodSplatter(effectPos, shotDir, isHeadshot ? 30 : 20);
         spawnGroundBloodStain(effectPos.x, effectPos.z, 0.45);
+
+        // 中彈受擊微幅向後震動後仰
+        dummy.hitRecoil = 0.14;
 
         practiceTargetsHit++;
         showHitMarker(isHeadshot);
@@ -6234,7 +7281,7 @@
           dummy.deathAnim = 0;
           dummy.mesh.root.visible = true; // 倒地絕不消失！
           audio.playDeathSound();
-          addKillFeed('🎯 人偶被擊破倒地！可持續掃射血肉模糊');
+          addKillFeed('🎯 靶場假人中彈向後倒地！可持續掃射留下彈孔');
         }
       }
 
@@ -6246,8 +7293,13 @@
         const effectPos = hitPoint || dummy.mesh.root.position.clone().add(new THREE.Vector3(0, 0.15, 0));
         const shotDir = bulletDir || new THREE.Vector3(0, -1, 0);
 
+        let surfaceNormal = hitNormal ? hitNormal.clone() : new THREE.Vector3(0, 1, 0);
+        if (surfaceNormal.dot(shotDir) > 0) {
+          surfaceNormal.negate();
+        }
+
         audio.playFleshHit();
-        attachBulletHoleToMesh(null, effectPos, hitNormal || new THREE.Vector3(0, 1, 0), dummy.mesh.root, 'flesh');
+        attachBulletHoleToMesh(null, effectPos, surfaceNormal, dummy.mesh.root, 'flesh');
 
         const bloodIntensity = Math.min(50, 24 + dummy.corpseHits * 2);
         spawnBloodSplatter(effectPos, shotDir.clone().negate().add(new THREE.Vector3(0, 2, 0)), bloodIntensity);
@@ -6266,7 +7318,7 @@
         if (dummy.corpseHits % 4 === 0) {
           spawnSparks(effectPos, 16, 'orange');
           if (dummy.corpseHits >= 8) {
-            addKillFeed(`🩸 掃射倒地人偶！血肉模糊 (身中 ${dummy.corpseHits} 彈)`);
+            addKillFeed(`🩸 掃射倒地假人！彈孔累累血肉模糊 (身中 ${dummy.corpseHits} 彈)`);
           }
         }
       }
@@ -6281,17 +7333,47 @@
         updateHUD();
       }
 
-      update(delta) {
+      update(delta, playerPos) {
+        const pPos = playerPos || (typeof playerController !== 'undefined' ? playerController.position : null);
         for (const dummy of this.dummies) {
+          if (dummy.mesh.mixer && dummy.alive) {
+            dummy.mesh.mixer.update(delta);
+          }
+
           if (!dummy.alive) {
-            // 倒在地上不消失，保持完整屍體呈現
-            if ((dummy.deathAnim || 0) < 1) {
-              dummy.deathAnim = Math.min(1, (dummy.deathAnim || 0) + delta * 3.5);
-              dummy.mesh.root.rotation.x = THREE.MathUtils.lerp(0, Math.PI / 2, dummy.deathAnim);
-              dummy.mesh.root.position.y = THREE.MathUtils.lerp(0, 0.12, dummy.deathAnim);
+            if (dummy.mesh.mixer) {
+              dummy.mesh.mixer.timeScale = 0; // 倒地時停止骨骼動畫
             }
-            dummy.mesh.root.position.y = Math.max(0.08, Math.min(0.22, dummy.mesh.root.position.y));
-            dummy.mesh.root.visible = true; // 屍體永久保持可見
+            // 向後倒下 (-Math.PI / 2)：被正面子彈擊中後仰向後倒在地面上！
+            if ((dummy.deathAnim || 0) < 1) {
+              dummy.deathAnim = Math.min(1, (dummy.deathAnim || 0) + delta * 3.8);
+              // 使用負角度 (-Math.PI / 2)，因為假人正面朝向 +Z (玩家)，繞 X 軸負向旋轉才是真正的「向後仰倒」！
+              const easeOut = 1 - Math.pow(1 - dummy.deathAnim, 2);
+              dummy.mesh.root.rotation.x = THREE.MathUtils.lerp(0, -Math.PI / 2, easeOut);
+              dummy.mesh.root.position.y = THREE.MathUtils.lerp(0, 0.14, easeOut);
+            }
+            dummy.mesh.root.position.y = Math.max(0.08, Math.min(0.24, dummy.mesh.root.position.y));
+            dummy.mesh.root.visible = true; // 屍體與彈孔永久保持可見
+          } else {
+            // Enforce VRM / GLB / procedural facing orientation toward the player (+Z of root)
+            const targetFlipY = isModelFlipped180 ? Math.PI : 0;
+            if (dummy.mesh.orientWrapper) {
+              dummy.mesh.orientWrapper.rotation.y = targetFlipY;
+            } else if (dummy.mesh.visual) {
+              dummy.mesh.visual.rotation.y = targetFlipY;
+            } else if (dummy.mesh.pelvis) {
+              dummy.mesh.pelvis.rotation.y = targetFlipY;
+            }
+            // 存活時始終正面朝向玩家 (方便任何角度練習射擊)
+            if (pPos) {
+              const lookTarget = new THREE.Vector3(pPos.x, dummy.mesh.root.position.y, pPos.z);
+              dummy.mesh.root.lookAt(lookTarget);
+            }
+            // 受擊時向後微仰回彈動畫 (向後仰 = 負 X 旋轉)
+            if (dummy.hitRecoil > 0) {
+              dummy.hitRecoil = Math.max(0, dummy.hitRecoil - delta * 0.8);
+              dummy.mesh.root.rotation.x -= dummy.hitRecoil;
+            }
           }
         }
       }
@@ -6741,13 +7823,19 @@
         const dist = enemyWorldPos.distanceTo(center);
         if (dist <= radius) {
           const damage = maxDamage * (1.0 - (dist / radius) * 0.7);
-          e.hp -= damage;
           spawnBloodSplatter(enemyWorldPos, enemyWorldPos.clone().sub(center).normalize(), 25);
 
-          if (e.hp <= 0) {
-            enemyManager.dismemberEnemy(e, center);
+          if (currentGameMode === 'zombie') {
+            // 喪屍模式：只有炸到頭部高度 (center.y >= 1.55) 才會爆頭倒地
+            const isHeadBlast = (center.y - e.mesh.root.position.y) >= 1.55;
+            enemyManager.damageEnemy(e.id, damage, isHeadBlast, enemyWorldPos, null, null, enemyWorldPos.clone().sub(center).normalize());
           } else {
-            e.state = 'alert';
+            e.hp -= damage;
+            if (e.hp <= 0) {
+              enemyManager.dismemberEnemy(e, center);
+            } else {
+              e.state = 'alert';
+            }
           }
         }
       }
@@ -7006,8 +8094,8 @@
 
         this.isReloading = false;
         this.isADS = false;
-        this.scopeZoomFov = 2.4; // 27.1X 預設狙擊放大倍率 (整張臉特寫)
-        this.userAdjustedScope = false; // 是否由玩家手動滾輪調整過
+        this.scopeZoomFov = 10.8; // 6.0X 預設舒適光學狙擊倍率，並可隨時用滑鼠滾輪在 1.7X ~ 260X 之間無段縮放！
+        this.userAdjustedScope = true; // 預設啟用滑鼠手動縮放控制，保留玩家設定的縮放倍率
         this.stance = 'STAND'; // 'STAND', 'CROUCH', 'PRONE'
         this.isSprinting = false;
 
@@ -7132,8 +8220,6 @@
               if (crosshair) crosshair.classList.add('aiming');
             } else {
               if (crosshair) crosshair.classList.remove('aiming');
-              this.userAdjustedScope = false;
-              this.scopeZoomFov = null;
             }
           }
         });
@@ -7141,38 +8227,32 @@
         window.addEventListener('mouseup', (e) => {
           if (e.button === 0) this.isFiring = false;
           if (e.button === 2) {
-            // If held for more than 220ms, release un-aims (Hold to aim mode)
+            // If held for more than 220ms, release un-aims (Hold to aim mode), while preserving scopeZoomFov!
             const holdDuration = performance.now() - adsMouseDownTime;
             if (holdDuration > 220 && this.isADS) {
               this.isADS = false;
               const crosshair = document.getElementById('crosshair-container');
               if (crosshair) crosshair.classList.remove('aiming');
-              this.userAdjustedScope = false;
-              this.scopeZoomFov = null;
             }
           }
         });
 
-        // Mouse Wheel Weapon Cycle & ADS Scope Zoom Magnification
+        // Mouse Wheel ADS Scope Zoom Magnification (瞄準鏡可以用滑鼠滾輪自由調整縮放倍率) & Weapon Cycle
         window.addEventListener('wheel', (e) => {
           if (gameState !== 'PLAYING') return;
-          const isScopedWeapon = (this.currentWeaponId === 'rifle' || this.currentWeaponId === 'blaster');
+          const isScopedWeapon = (this.currentWeaponId !== 'saber');
           if (this.isADS && isScopedWeapon) {
-            if (!this.scopeZoomFov) this.scopeZoomFov = this.currentEffectiveScopeFov || 1.2;
+            if (!this.scopeZoomFov) this.scopeZoomFov = this.currentEffectiveScopeFov || 10.8;
             this.userAdjustedScope = true;
-            if (e.deltaY < 0) {
-              // 滾輪往前推：極限放大拉近至 0.20° (相當於 325X 超高倍率，整張臉佔滿瞄準鏡大圓)
-              this.scopeZoomFov = Math.max(0.20, this.scopeZoomFov * 0.82);
+            const zoomIn = (e.deltaY < 0);
+            if (zoomIn) {
+              // 滾輪往前推 (向上滾)：放大拉近，最高至 0.25° (260X 超高倍率特寫)
+              this.scopeZoomFov = Math.max(0.25, this.scopeZoomFov * 0.84);
             } else {
-              // 滾輪往後推：廣角拉遠，最大至 24.0°
-              this.scopeZoomFov = Math.min(24.0, this.scopeZoomFov * 1.22);
+              // 滾輪往後推 (向下滾)：廣角拉遠，最大至 38.0° (1.7X 低倍廣角視野)
+              this.scopeZoomFov = Math.min(38.0, this.scopeZoomFov * 1.19);
             }
-            const scopeTag = document.getElementById('scope-tag');
-            if (scopeTag) {
-              const mag = (65 / this.scopeZoomFov).toFixed(1);
-              const tagNote = this.scopeZoomFov <= 0.6 ? '極限大圓特寫' : (this.scopeZoomFov <= 1.5 ? '大圓臉部滿鏡' : '廣角特寫');
-              scopeTag.innerText = `OPTICAL ${mag}X // SNIPER SCOPE (${tagNote})`;
-            }
+            audio.playScopeZoomSound(zoomIn);
             return;
           }
           const order = ['rifle', 'blaster', 'rocket', 'saber'];
@@ -7194,6 +8274,9 @@
 
           if (e.code === 'KeyR') {
             this.reload();
+          }
+          if (e.code === 'KeyB') {
+            flipCurrentModelOrientation();
           }
           if (e.code === 'Digit1' || e.code === 'Numpad1') {
             this.switchWeapon('rifle');
@@ -7231,7 +8314,25 @@
             this.toggleCrouch();
           }
           if (e.code === 'KeyZ') {
-            this.toggleProne();
+            if (this.isADS && this.currentWeaponId !== 'saber') {
+              this.cycleScopeZoomPreset();
+            } else {
+              this.toggleProne();
+            }
+          }
+          if (e.code === 'BracketLeft') {
+            if (this.isADS && this.currentWeaponId !== 'saber') {
+              this.scopeZoomFov = Math.min(38.0, (this.scopeZoomFov || 10.8) * 1.25);
+              this.userAdjustedScope = true;
+              audio.playScopeZoomSound(false);
+            }
+          }
+          if (e.code === 'BracketRight') {
+            if (this.isADS && this.currentWeaponId !== 'saber') {
+              this.scopeZoomFov = Math.max(0.25, (this.scopeZoomFov || 10.8) * 0.80);
+              this.userAdjustedScope = true;
+              audio.playScopeZoomSound(true);
+            }
           }
           if (e.code === 'KeyX') {
             this.recoverStance();
@@ -7427,8 +8528,6 @@
             } else {
               btnAds.classList.remove('active');
               if (crosshair) crosshair.classList.remove('aiming');
-              this.userAdjustedScope = false;
-              this.scopeZoomFov = null;
             }
           };
           btnAds.addEventListener('touchstart', toggleAds, { passive: false });
@@ -7558,6 +8657,77 @@
 
         const grenadeBtn = document.getElementById('grenade-wrapper');
         if (grenadeBtn) grenadeBtn.addEventListener('click', () => this.throwGrenade());
+
+        // Scope Preset Buttons (1.5X, 3X, 6X, 12X, 24X, 60X)
+        document.querySelectorAll('.scope-preset-btn').forEach(btn => {
+          const handler = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const mag = parseFloat(btn.getAttribute('data-mag'));
+            this.setScopeZoomMag(mag, true);
+          };
+          btn.addEventListener('click', handler);
+          btn.addEventListener('touchstart', handler, { passive: false });
+        });
+
+        // Touch Pinch-to-Zoom Gesture for Scope (手機與平板雙指捏合縮放瞄準鏡)
+        let pinchStartDist = 0;
+        let pinchStartFov = 10.8;
+        let isPinching = false;
+
+        window.addEventListener('touchstart', (e) => {
+          if (gameState !== 'PLAYING') return;
+          if (e.touches.length === 2 && this.isADS) {
+            const t0 = e.touches[0];
+            const t1 = e.touches[1];
+            pinchStartDist = Math.hypot(t0.clientX - t1.clientX, t0.clientY - t1.clientY);
+            pinchStartFov = this.scopeZoomFov || this.currentEffectiveScopeFov || 10.8;
+            isPinching = true;
+          }
+        }, { passive: true });
+
+        window.addEventListener('touchmove', (e) => {
+          if (!isPinching || e.touches.length !== 2 || !this.isADS) return;
+          const t0 = e.touches[0];
+          const t1 = e.touches[1];
+          const curDist = Math.hypot(t0.clientX - t1.clientX, t0.clientY - t1.clientY);
+          if (pinchStartDist > 10) {
+            const ratio = curDist / pinchStartDist;
+            const newFov = Math.max(0.25, Math.min(38.0, pinchStartFov / Math.pow(ratio, 1.25)));
+            if (Math.abs(newFov - this.scopeZoomFov) > 0.15) {
+              this.scopeZoomFov = newFov;
+              this.userAdjustedScope = true;
+              audio.playScopeZoomSound(ratio > 1.0);
+            }
+          }
+        }, { passive: true });
+
+        const endPinch = (e) => {
+          if (e.touches.length < 2) isPinching = false;
+        };
+        window.addEventListener('touchend', endPinch, { passive: true });
+        window.addEventListener('touchcancel', endPinch, { passive: true });
+      }
+
+      setScopeZoomMag(magMultiplier, playSound = true) {
+        const targetFov = Math.max(0.25, Math.min(38.0, 65.0 / magMultiplier));
+        this.scopeZoomFov = targetFov;
+        this.userAdjustedScope = true;
+        if (playSound && audio) audio.playScopeZoomSound(magMultiplier >= 6.0);
+      }
+
+      cycleScopeZoomPreset() {
+        const presets = [1.5, 3.0, 6.0, 12.0, 24.0, 60.0];
+        const curFov = this.scopeZoomFov || 10.8;
+        const curMag = 65.0 / curFov;
+        let nextIdx = 0;
+        for (let i = 0; i < presets.length; i++) {
+          if (presets[i] > curMag + 0.5) {
+            nextIdx = i;
+            break;
+          }
+        }
+        this.setScopeZoomMag(presets[nextIdx], true);
       }
 
       togglePerspective() {
@@ -7626,7 +8796,8 @@
 
       reset(difficultyKey) {
         const diff = DIFFICULTIES[difficultyKey];
-        this.maxHp = diff.playerMaxHp;
+        // 在喪屍模式中，即使選了無敵難度，仍給予 200 HP 實體血條，被喪屍咬到血條歸零即結束遊戲！
+        this.maxHp = (currentGameMode === 'zombie' && diff.isGod) ? 200 : diff.playerMaxHp;
         this.hp = this.maxHp;
 
         this.grenadeCount = 3;
@@ -7634,9 +8805,9 @@
         if (countElem) countElem.innerText = this.grenadeCount;
 
         this.weaponsAmmo = {
-          rifle: { mag: 30, reserve: diff.reserveAmmo },
-          blaster: { mag: 45, reserve: Math.floor(diff.reserveAmmo * 1.5) },
-          rocket: { mag: 1, reserve: diff.isGod ? 999 : Math.max(8, Math.floor(diff.reserveAmmo * 0.1)) },
+          rifle: { mag: 30, reserve: currentGameMode === 'zombie' ? 999 : diff.reserveAmmo },
+          blaster: { mag: 45, reserve: currentGameMode === 'zombie' ? 999 : Math.floor(diff.reserveAmmo * 1.5) },
+          rocket: { mag: 1, reserve: (diff.isGod || currentGameMode === 'zombie') ? 999 : Math.max(8, Math.floor(diff.reserveAmmo * 0.1)) },
           saber: { mag: 999, reserve: 999 }
         };
         this.isReloading = false;
@@ -7667,7 +8838,7 @@
         document.getElementById('reload-prompt').style.display = 'none';
 
         setTimeout(() => {
-          if (diff.isGod) {
+          if (diff.isGod || currentGameMode === 'zombie') {
             curAmmo.mag = config.magCapacity;
             curAmmo.reserve = 999;
           } else {
@@ -7681,9 +8852,10 @@
         }, config.isEnergy ? 900 : (config.isRocket ? 1300 : 1100));
       }
 
-      takeDamage(amount, attackerPos = null) {
+      takeDamage(amount, attackerPos = null, forceZombieBite = false) {
         const diff = DIFFICULTIES[currentDifficulty];
-        if (diff.isGod || gameState !== 'PLAYING') return;
+        if (gameState !== 'PLAYING') return;
+        if (diff.isGod && !forceZombieBite) return;
 
         this.hp = Math.max(0, this.hp - amount);
         this.timeSinceLastDamage = 0; // Reset cover regen timer
@@ -7719,12 +8891,12 @@
         const diff = DIFFICULTIES[currentDifficulty];
         const config = WEAPON_CONFIGS[this.currentWeaponId];
 
-        // Tactical Cover Health Regeneration: 躲在掩體後依時間自動恢復血量
+        // Tactical Cover Health Regeneration: 躲在掩體後依時間自動恢復血量 (喪屍模式不自動回血，被咬到血條歸零即結束！)
         this.timeSinceLastDamage = (this.timeSinceLastDamage || 0) + delta;
         const regenDelay = diff.isGod ? 0 : (currentDifficulty === 'easy' ? 2.2 : 3.5);
         const hpBar = document.getElementById('hp-bar');
 
-        if (this.timeSinceLastDamage >= regenDelay && this.hp < this.maxHp && this.hp > 0) {
+        if (currentGameMode !== 'zombie' && this.timeSinceLastDamage >= regenDelay && this.hp < this.maxHp && this.hp > 0) {
           const regenRate = 18.0; // +18 HP per second
           this.hp = Math.min(this.maxHp, this.hp + regenRate * delta);
           updateHUD();
@@ -7837,7 +9009,7 @@
         // Camera Orientation & 1st/3rd Person Mode Handling
         this.recoilPitch = THREE.MathUtils.lerp(this.recoilPitch, 0, 15 * delta);
 
-        const isScopedWeapon = (this.currentWeaponId === 'rifle' || this.currentWeaponId === 'blaster');
+        const isScopedWeapon = (this.currentWeaponId !== 'saber');
         if (this.cameraMode === 'first') {
           playerSoldierModel.root.visible = false;
           // Hide weapon model when looking through optical sniper scope to prevent near-plane polygon clipping & jitter
@@ -7958,62 +9130,56 @@
         }
 
         // ----------------------------------------------------
-        // 瞄準鏡大圓滿鏡特寫 (Big Circle Scope Auto-Framing) & 近身壓迫感聚焦
+        // 瞄準鏡滑鼠滾輪縮放 (Mouse Wheel Scope Zoom) & 近身壓迫感聚焦
         // ----------------------------------------------------
         let targetEnemyDist = null;
         let closestFrontDist = 999;
 
-        if (typeof enemyManager !== 'undefined' && enemyManager.enemies) {
-          const camPos = camera.position;
-          const camDir = new THREE.Vector3();
-          camera.getWorldDirection(camDir);
+        const camPos = camera.position;
+        const camDir = new THREE.Vector3();
+        camera.getWorldDirection(camDir);
+        let bestAimScore = -1;
 
-          let bestAimScore = -1;
-          for (const e of enemyManager.enemies) {
-            if (!e.alive) continue;
-            // 敵軍頭部世界座標
-            const headPos = e.mesh.root.position.clone();
-            headPos.y += (e.mesh.isGlb ? 1.88 : 2.12);
+        const allTargets = (currentGameMode === 'practice' && typeof trainingDummyManager !== 'undefined')
+          ? trainingDummyManager.dummies
+          : ((typeof enemyManager !== 'undefined' && enemyManager.enemies) ? enemyManager.enemies : []);
 
-            const toEnemy = headPos.clone().sub(camPos);
-            const dist = toEnemy.length();
-            if (dist < 0.1) continue;
+        for (const e of allTargets) {
+          if (!e.alive) continue;
+          const headPos = e.mesh.root.position.clone();
+          headPos.y += (e.mesh.isGlb ? 1.88 : 2.12);
 
-            const toDir = toEnemy.clone().normalize();
-            const dot = toDir.dot(camDir);
+          const toEnemy = headPos.clone().sub(camPos);
+          const dist = toEnemy.length();
+          if (dist < 0.1) continue;
 
-            // 正前方近身距離監測 (2.8m 內)
-            if (dist < 2.8 && dot > 0.35) {
-              if (dist < closestFrontDist) closestFrontDist = dist;
-            }
+          const toDir = toEnemy.clone().normalize();
+          const dot = toDir.dot(camDir);
 
-            // 準心目標鎖定判定 (dot > 0.82)
-            if (dot > 0.82) {
-              const score = (dot * dot) / (1.0 + dist * 0.04);
-              if (score > bestAimScore) {
-                bestAimScore = score;
-                targetEnemyDist = dist;
-              }
+          // 正前方近身距離監測 (2.8m 內)
+          if (dist < 2.8 && dot > 0.35) {
+            if (dist < closestFrontDist) closestFrontDist = dist;
+          }
+
+          // 準心目標鎖定判定 (dot > 0.82)
+          if (dot > 0.82) {
+            const score = (dot * dot) / (1.0 + dist * 0.04);
+            if (score > bestAimScore) {
+              bestAimScore = score;
+              targetEnemyDist = dist;
             }
           }
         }
 
-        // 1. 近身時 (若未開鏡)：敵軍逼近至 2.5m 內時，視角自適應收束至 36°~40°，使敵軍整張臉如大圓般巨大震撼！
+        // 1. 近身時 (若未開鏡)：敵軍逼近至 2.5m 內時，視角自適應收束至 36°~40°
         let baseHipFov = 65;
         if (closestFrontDist < 2.5) {
           const proximityT = Math.max(0, Math.min(1, (2.5 - closestFrontDist) / (2.5 - 0.54)));
           baseHipFov = THREE.MathUtils.lerp(65, 36, proximityT);
         }
 
-        // 2. 瞄準鏡大圓滿鏡計算：敵軍頭部 (0.32m) 剛好填滿 84vh 大圓圈 (約佔視場 78%)
-        // 公式：autoBigCircleFov = (0.32 / dist) * (180 / (PI * 0.78))
-        let autoBigCircleFov = targetEnemyDist
-          ? Math.max(0.20, Math.min(22.0, (0.32 / targetEnemyDist) * (180 / (Math.PI * 0.78))))
-          : 0.85;
-
-        let effectiveScopedFov = this.userAdjustedScope
-          ? (this.scopeZoomFov || autoBigCircleFov)
-          : autoBigCircleFov;
+        // 2. 瞄準鏡倍率：由玩家滑鼠滾輪自由控制 (1.7X ~ 260X)
+        let effectiveScopedFov = this.scopeZoomFov || 10.8;
         this.currentEffectiveScopeFov = effectiveScopedFov;
 
         const targetFov = this.isADS
@@ -8028,11 +9194,48 @@
           scopeOverlay.classList.toggle('active', this.isADS && isScopedWeapon);
         }
 
-        const scopeTag = document.getElementById('scope-tag');
-        if (scopeTag && this.isADS && isScopedWeapon) {
+        if (this.isADS && isScopedWeapon) {
           const mag = (65 / effectiveScopedFov).toFixed(1);
-          const tagNote = effectiveScopedFov <= 0.6 ? '極限大圓特寫' : (effectiveScopedFov <= 1.5 ? '大圓臉部滿鏡' : '近身大圓特寫');
-          scopeTag.innerText = `OPTICAL ${mag}X // SNIPER SCOPE (${tagNote})`;
+          const magFloat = parseFloat(mag);
+          const scopeTag = document.getElementById('scope-tag');
+          if (scopeTag) {
+            const tagNote = effectiveScopedFov <= 1.2 ? '極限臉部特寫' : (effectiveScopedFov <= 6.0 ? '高倍精準狙擊' : '中廣角戰術瞄準');
+            scopeTag.innerText = `OPTICAL ${mag}X // TACTICAL SCOPE (🖱️ 滾輪 / 雙指捏合縮放・${tagNote})`;
+          }
+          const zoomVal = document.getElementById('scope-zoom-val');
+          if (zoomVal) zoomVal.innerText = `${mag}X`;
+          const zoomFill = document.getElementById('scope-zoom-fill');
+          if (zoomFill) {
+            // Map FOV [38.0 -> 0.25] logarithmically to [5% -> 100%]
+            const pct = Math.max(5, Math.min(100, (Math.log(38.0 / effectiveScopedFov) / Math.log(38.0 / 0.25)) * 100));
+            zoomFill.style.width = `${pct}%`;
+          }
+
+          // Update Scope Rangefinder & Target Status
+          const rangeText = document.getElementById('scope-range-text');
+          const targetStatus = document.getElementById('scope-target-status');
+          if (rangeText && targetStatus) {
+            if (targetEnemyDist !== null) {
+              rangeText.innerText = `RANGE: ${targetEnemyDist.toFixed(1)}M`;
+              targetStatus.innerText = `[TARGET LOCKED]`;
+              targetStatus.classList.add('locked');
+            } else {
+              const groundRange = Math.min(99.9, Math.max(1.0, 1.8 / Math.sin(Math.max(0.02, Math.abs(this.pitch) + 0.05))));
+              rangeText.innerText = `RANGE: ${groundRange.toFixed(1)}M`;
+              targetStatus.innerText = `[SCANNING]`;
+              targetStatus.classList.remove('locked');
+            }
+          }
+
+          // Update Active Scope Preset Button
+          document.querySelectorAll('.scope-preset-btn').forEach(btn => {
+            const btnMag = parseFloat(btn.getAttribute('data-mag'));
+            if (Math.abs(btnMag - magFloat) < 0.6) {
+              btn.classList.add('active');
+            } else {
+              btn.classList.remove('active');
+            }
+          });
         }
 
         // Weapon Firing
@@ -8092,14 +9295,14 @@
 
         playerFlashLight.position.copy(this.position);
         playerFlashLight.color.setHex(config.muzzleColor);
-        playerFlashLight.intensity = config.isEnergy ? 6.5 : 5.0;
+        playerFlashLight.intensity = config.isEnergy ? 14.0 : 11.5;
         const fovRatio = (camera.fov / 65);
         const recoilDelta = (config.isEnergy ? 0.016 : 0.022) * (this.isADS ? fovRatio * 0.40 : 1.0);
         this.recoilPitch = Math.min(0.12 * (this.isADS ? fovRatio : 1.0), this.recoilPitch + recoilDelta);
         activeWeaponModel.gun.position.z += (config.isEnergy ? 0.035 : 0.045) * (this.isADS ? 0.2 : 1.0);
 
-        triggerMuzzleFlash(activeWeaponModel.muzzleFlash);
-        spawnMuzzleSparks(muzzleWorld, raycaster.ray.direction, config.isEnergy ? 24 : 20, config.isEnergy ? 'cyan' : 'orange');
+        triggerMuzzleFlash(activeWeaponModel.muzzleFlash, config.isEnergy ? 1.25 : 1.35);
+        spawnMuzzleSparks(muzzleWorld, raycaster.ray.direction, config.isEnergy ? 28 : 26, config.isEnergy ? 'cyan' : 'orange');
 
         const enemyHitTargets = [];
         for (const e of enemyManager.enemies) {
@@ -8121,6 +9324,15 @@
         for (const d of trainingDummyManager.dummies) {
           if (d.alive || d.isCorpse) {
             dummyHitTargets.push(d.mesh.head, d.mesh.torso, d.mesh.leftArm, d.mesh.rightArm, d.mesh.leftLeg, d.mesh.rightLeg);
+            if (d.mesh.pelvis && d.mesh.pelvis !== d.mesh.root) {
+              dummyHitTargets.push(d.mesh.pelvis);
+            }
+            if (d.mesh.bodyCylinder) {
+              dummyHitTargets.push(d.mesh.bodyCylinder);
+            }
+            if (d.mesh.visual) {
+              dummyHitTargets.push(d.mesh.visual);
+            }
           }
         }
 
@@ -8130,14 +9342,6 @@
         if (intersects.length > 0) {
           const hit = intersects[0];
           const hitPoint = hit.point;
-
-          if (config.isEnergy) {
-            spawnThickLaserBeam(muzzleWorld, hitPoint, 0x00f3ff, 0.075);
-            spawnSparks(hitPoint, 18, 'cyan');
-          } else {
-            spawnTracer(muzzleWorld, hitPoint, false);
-            spawnSparks(hitPoint, 14, 'orange');
-          }
 
           let enemyId = null;
           let dummyId = null;
@@ -8157,58 +9361,55 @@
             const hitEnemy = enemyManager.enemies.find(e => e.id === enemyId);
             if (hitEnemy && hitEnemy.mesh && hitEnemy.mesh.root) {
               const relY = hitPoint.y - hitEnemy.mesh.root.position.y;
-              if (relY >= 1.76) {
+              if (relY >= 1.65) {
                 isHead = true;
               }
             }
           } else if (cur && cur.userData.dummyId !== undefined) {
             dummyId = cur.userData.dummyId;
             isHead = !!cur.userData.isHead;
+            const hitDummy = trainingDummyManager.dummies.find(d => d.id === dummyId);
+            if (hitDummy && hitDummy.mesh && hitDummy.mesh.root) {
+              const relY = hitPoint.y - hitDummy.mesh.root.position.y;
+              if (relY >= 1.65) {
+                isHead = true;
+              }
+            }
           }
 
-          if (barrelId !== null) {
-            const barrelDmg = config.isEnergy ? 40 : 30;
-            barrelManager.damageBarrel(barrelId, barrelDmg, hitPoint);
-            showHitMarker(false);
-          } else if (enemyId !== null) {
-            const enemy = enemyManager.enemies.find(e => e.id === enemyId);
-            if (enemy) {
-              if (enemy.alive) {
-                const damage = isHead ? config.headDamage : (diff.isGod ? config.damage * 2.5 : config.damage);
-                enemyManager.damageEnemy(enemyId, damage, isHead, hitPoint, hitSubMesh, hit.face ? hit.face.normal : null, raycaster.ray.direction);
-                showHitMarker(isHead);
-              } else {
-                // 屍體倒在地上不消失，可以一直打，打到血肉模糊！
-                enemyManager.damageCorpse(enemy, hitPoint, hit.face ? hit.face.normal : null, raycaster.ray.direction, config.damage);
-                showHitMarker(false);
-              }
-            }
-          } else if (dummyId !== null) {
-            const dummy = trainingDummyManager.dummies.find(d => d.id === dummyId);
-            if (dummy) {
-              if (dummy.alive) {
-                const damage = isHead ? config.headDamage : config.damage;
-                trainingDummyManager.damageDummy(dummyId, damage, isHead, hitPoint, hitSubMesh, hit.face ? hit.face.normal : null, raycaster.ray.direction);
-                showHitMarker(isHead);
-              } else {
-                // 人偶屍體倒在地上不消失，可以一直打，打到血肉模糊！
-                trainingDummyManager.damageCorpse(dummy, hitPoint, hit.face ? hit.face.normal : null, raycaster.ray.direction);
-                showHitMarker(false);
-              }
-            }
-          } else {
-            // 場景環境/牆壁/掩體/街道衝擊彈孔
-            if (!config.isEnergy && hit.face && hitPoint) {
-              attachBulletHoleToMesh(hit.object, hitPoint, hit.face.normal, scene, 'metal');
-            }
+          const hitData = {
+            enemyId,
+            dummyId,
+            barrelId,
+            isHead,
+            hitPoint,
+            hitSubMesh,
+            hitNormal: hit.face ? hit.face.normal : null,
+            dir: raycaster.ray.direction.clone(),
+            config,
+            diff
+          };
+
+          if (config.isEnergy) {
+            spawnThickLaserBeam(muzzleWorld, hitPoint, 0x00f3ff, 0.075);
           }
+          // Spawn High-Velocity 3D Bullet Flying toward target and penetrating
+          spawnBullet(muzzleWorld, hitPoint, {
+            isEnemy: false,
+            type: config.isEnergy ? 'blaster' : 'rifle',
+            colorHex: config.muzzleColor,
+            hitData
+          });
         } else {
-          const farPoint = camera.position.clone().add(raycaster.ray.direction.clone().multiplyScalar(140));
+          const farPoint = camera.position.clone().add(raycaster.ray.direction.clone().multiplyScalar(150));
           if (config.isEnergy) {
             spawnThickLaserBeam(muzzleWorld, farPoint, 0x00f3ff, 0.075);
-          } else {
-            spawnTracer(muzzleWorld, farPoint, false);
           }
+          spawnBullet(muzzleWorld, farPoint, {
+            isEnemy: false,
+            type: config.isEnergy ? 'blaster' : 'rifle',
+            colorHex: config.muzzleColor
+          });
         }
       }
 
@@ -8245,7 +9446,8 @@
             if (dist <= meleeRange) {
               const dot = toEnemy.normalize().dot(camDir);
               if (dot > 0.35) {
-                enemyManager.damageEnemy(e.id, 999, false, enemyPos, null, null, camDir);
+                const isSaberHeadshot = (currentGameMode !== 'zombie') || (camDir.y >= -0.14);
+                enemyManager.damageEnemy(e.id, 999, isSaberHeadshot, enemyPos, null, null, camDir);
                 spawnSparks(enemyPos, 30, 'cyan');
                 hitAny = true;
               }
@@ -8331,6 +9533,10 @@
           modeDisplay.innerText = `模式: 🎯 練習靶場 (命中:${practiceTargetsHit} / 斬碎:${practiceTargetsSliced})`;
           modeDisplay.style.borderColor = 'rgba(255, 170, 0, 0.6)';
           modeDisplay.style.color = '#ffbb33';
+        } else if (currentGameMode === 'zombie') {
+          modeDisplay.innerText = `模式: 🧟 喪屍狂潮 (爆頭擊殺: ${zombieKills} | 僅打頭倒地)`;
+          modeDisplay.style.borderColor = 'rgba(255, 50, 90, 0.75)';
+          modeDisplay.style.color = '#ff5577';
         } else {
           modeDisplay.innerText = `難度: ${diff.name}`;
           modeDisplay.style.borderColor = 'rgba(0, 255, 170, 0.4)';
@@ -8365,6 +9571,8 @@
           else if (pz > -450) waveBadge.innerText = 'SECTOR CHARLIE // CQB市政廣場 (RANGE C)';
           else if (pz > -600) waveBadge.innerText = 'SECTOR DELTA // 戰火廢墟 (RANGE D)';
           else waveBadge.innerText = 'SECTOR ECHO // 終極靶區 (RANGE E)';
+        } else if (currentGameMode === 'zombie') {
+          waveBadge.innerText = `🧟 ZOMBIE HORDE // 僅限打頭擊倒 • 已爆頭 ${zombieKills} 隻`;
         } else {
           if (pz > -150) waveBadge.innerText = 'SECTOR ALPHA // 前哨街區 (0~150M)';
           else if (pz > -300) waveBadge.innerText = 'SECTOR BRAVO // 高架立交 (150~300M)';
@@ -8386,20 +9594,24 @@
 
       const curAmmo = playerController ? playerController.weaponsAmmo[curWeapId] : { mag: 30, reserve: 120 };
 
-      if (config.isMelee) {
-        ammoCur.innerText = '⚡';
-        ammoRes.innerText = '∞';
-      } else if (diff.isGod) {
+      if (diff.isGod && currentGameMode !== 'zombie') {
         hpBar.className = 'hp-bar-inner god';
         hpBar.style.width = '100%';
         hpText.innerText = '999';
-        ammoCur.innerText = '∞';
-        ammoRes.innerText = '∞';
-      } else {
+      } else if (playerController) {
         const hpPercent = Math.max(0, (playerController.hp / playerController.maxHp) * 100);
         hpBar.style.width = `${hpPercent}%`;
         hpBar.className = (hpPercent < 30) ? 'hp-bar-inner low' : 'hp-bar-inner';
         hpText.innerText = Math.ceil(playerController.hp);
+      }
+
+      if (config.isMelee) {
+        ammoCur.innerText = '⚡';
+        ammoRes.innerText = '∞';
+      } else if (diff.isGod) {
+        ammoCur.innerText = '∞';
+        ammoRes.innerText = '∞';
+      } else {
         ammoCur.innerText = curAmmo.mag;
         ammoRes.innerText = curAmmo.reserve;
       }
@@ -8433,6 +9645,8 @@
       if (hostLabel) {
         if (currentGameMode === 'practice') {
           hostLabel.innerHTML = `TARGETS: <span id="radar-hostiles-val" style="color:#ffaa00;">${alive}</span>`;
+        } else if (currentGameMode === 'zombie') {
+          hostLabel.innerHTML = `ZOMBIES: <span id="radar-hostiles-val" style="color:#ff3366;">${alive}</span>`;
         } else {
           hostLabel.innerHTML = `HOSTILES: <span id="radar-hostiles-val" style="color:#ff4444;">${alive}</span>`;
         }
@@ -8441,6 +9655,8 @@
       if (enemyCounter) {
         if (currentGameMode === 'practice') {
           enemyCounter.innerText = `靶場模式: ${alive} / ${total} 具戰術假人`;
+        } else if (currentGameMode === 'zombie') {
+          enemyCounter.innerText = `🧟 喪屍狂潮: 場上 ${alive} 隻 | 爆頭擊倒: ${zombieKills}`;
         } else {
           enemyCounter.innerText = `剩餘敵軍: ${alive} / ${total}`;
         }
@@ -8473,6 +9689,7 @@
       currentGameMode = mode;
       gameState = 'PLAYING';
       missionStartTime = performance.now();
+      zombieKills = 0;
 
       const startModal = document.getElementById('start-modal');
       if (startModal) startModal.style.display = 'none';
@@ -8502,7 +9719,8 @@
         trainingDummyManager.clearAll();
         friendlySquad.clearAll(); // Ensure lone-wolf combat, no squadmates auto-firing/stealing kills
         const diff = DIFFICULTIES[currentDifficulty];
-        enemyManager.spawnSectorEnemies(diff.enemyCount || 24);
+        const spawnCount = (currentGameMode === 'zombie') ? Math.max(18, diff.enemyCount || 20) : (diff.enemyCount || 24);
+        enemyManager.spawnSectorEnemies(spawnCount);
       }
 
       updateHUD();
@@ -8539,11 +9757,30 @@
       if (document.pointerLockElement) {
         try { document.exitPointerLock(); } catch (e) {}
       }
+      const goTitle = document.getElementById('gameover-title');
+      const goSub = document.getElementById('gameover-subtitle');
+      const goStats = document.getElementById('gameover-stats');
+      const elapsedSec = ((performance.now() - missionStartTime) / 1000).toFixed(1);
+      if (currentGameMode === 'zombie') {
+        if (goTitle) goTitle.innerText = '🧟 慘遭屍群吞噬 (DEVOURED)';
+        if (goSub) goSub.innerText = '你被湧上來的喪屍人偶咬乾了最後一滴血...';
+        if (goStats) {
+          goStats.style.display = 'block';
+          goStats.innerHTML = `
+            生存時間: <b style="color:#00f3ff;">${elapsedSec} 秒</b><br>
+            爆頭擊倒喪屍: <b style="color:#ff4466;">${zombieKills} 隻</b>
+          `;
+        }
+      } else {
+        if (goTitle) goTitle.innerText = '作戰失敗 (K.I.A.)';
+        if (goSub) goSub.innerText = '你在激烈交火中倒下了。利用掩體或切換至無敵戰神模式！';
+        if (goStats) goStats.style.display = 'none';
+      }
       document.getElementById('gameover-modal').style.display = 'flex';
     }
 
     function triggerVictory() {
-      if (currentGameMode === 'practice') return; // Practice mode is continuous sandbox
+      if (currentGameMode === 'practice' || currentGameMode === 'zombie') return; // Practice & Zombie modes are continuous
       gameState = 'VICTORY';
       if (document.pointerLockElement) {
         try { document.exitPointerLock(); } catch (e) {}
@@ -8584,6 +9821,21 @@
         document.querySelectorAll('.mode-select-btn[data-gamemode]').forEach(b => {
           b.classList.toggle('active', b.getAttribute('data-gamemode') === mode);
         });
+        if (currentGameMode === 'practice') {
+          enemyManager.clearAll();
+          friendlySquad.clearAll();
+          trainingDummyManager.spawnDummies();
+        } else {
+          trainingDummyManager.clearAll();
+          friendlySquad.clearAll();
+          if (currentGameMode === 'zombie') {
+            zombieKills = 0;
+            playerController.reset(currentDifficulty);
+          }
+          const diff = DIFFICULTIES[currentDifficulty];
+          const spawnCount = (currentGameMode === 'zombie') ? Math.max(18, diff.enemyCount || 20) : (diff.enemyCount || 24);
+          enemyManager.spawnSectorEnemies(spawnCount);
+        }
         updateHUD();
       };
       btn.addEventListener('click', selectMode);
@@ -8595,7 +9847,7 @@
       const selectDiff = (e) => {
         if (e && e.cancelable && e.type === 'touchend') e.preventDefault();
         const mode = btn.getAttribute('data-mode');
-        document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.diff-btn[data-mode]').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         currentDifficulty = mode;
       };
@@ -8628,37 +9880,64 @@
       btn.addEventListener('touchend', selectTime, { passive: false });
     });
 
-    // Enemy 3D Model selection buttons (both start and pause modals)
+    // Enemy / Practice Dummy 3D Model selection buttons (both start and pause modals)
     function setEnemyModelMode(mode) {
       currentEnemyModelType = mode;
       try {
         localStorage.setItem('fps_enemy_model', mode);
       } catch (e) {}
       highlightModelButtons(mode);
-      if (mode === 'soldier') {
-        showPickupToast('🪖 敵軍外觀已切換為：戰術特戰士兵');
-        if (gameState === 'PLAYING' && enemyManager) {
-          enemyManager.spawnSectorEnemies(enemyManager.getAliveCount() || 24);
+
+      const refreshActiveTargets = (defaultCount) => {
+        if (gameState === 'PLAYING' || gameState === 'PAUSED') {
+          if (currentGameMode === 'practice' && typeof trainingDummyManager !== 'undefined') {
+            trainingDummyManager.spawnDummies();
+          } else if (enemyManager) {
+            enemyManager.spawnSectorEnemies(enemyManager.getAliveCount() || defaultCount);
+          }
         }
+      };
+
+      if (mode === 'dummy') {
+        showPickupToast('🎯 3D 外觀已切換為：戰術標靶假人');
+        refreshActiveTargets(16);
+      } else if (mode === 'soldier') {
+        showPickupToast('🪖 3D 外觀已切換為：戰術特戰士兵');
+        refreshActiveTargets(24);
       } else if (mode === 'glb') {
         if (modelCache['glb']) {
           cachedGlbData = modelCache['glb'];
-          showPickupToast('👧 敵軍外觀已切換為：' + cachedGlbData.name);
-          if (gameState === 'PLAYING' && enemyManager) {
-            enemyManager.spawnSectorEnemies(enemyManager.getAliveCount() || 8);
-          }
+          showPickupToast('👧 3D 外觀已切換為：' + cachedGlbData.name);
+          refreshActiveTargets(8);
         } else {
-          loadGlbEnemyModel(DEFAULT_GLB_PATH, '泳裝 Mint', 'glb', 0);
+          loadGlbEnemyModel(DEFAULT_GLB_PATH, '泳裝 Mint', 'glb', 0, false);
         }
       } else if (mode === 'r18') {
         if (modelCache['r18']) {
           cachedGlbData = modelCache['r18'];
-          showPickupToast('🔞 敵軍外觀已切換為：' + cachedGlbData.name);
-          if (gameState === 'PLAYING' && enemyManager) {
-            enemyManager.spawnSectorEnemies(enemyManager.getAliveCount() || 8);
-          }
+          showPickupToast('🔞 3D 外觀已切換為：' + cachedGlbData.name);
+          refreshActiveTargets(8);
         } else {
-          loadGlbEnemyModel(R18_GLB_PATH, '🔞 R18 無遮蔽', 'r18', 0);
+          loadGlbEnemyModel(R18_GLB_PATH, '🔞 R18 無遮蔽', 'r18', 0, false);
+        }
+      } else if (mode === 'custom') {
+        if (modelCache['custom']) {
+          cachedGlbData = modelCache['custom'];
+          showPickupToast('📂 3D 外觀已切換為：' + cachedGlbData.name);
+          refreshActiveTargets(8);
+        } else {
+          loadCustomModelFromDB().then((saved) => {
+            if (saved && saved.file) {
+              const blobUrl = URL.createObjectURL(saved.file);
+              const fname = saved.name || saved.file.name || '自訂VRM';
+              const displayName = fname.replace(/\.[^/.]+$/, "");
+              const isVrmFile = fname.toLowerCase().endsWith('.vrm');
+              loadGlbEnemyModel(blobUrl, displayName, 'custom', null, isVrmFile);
+            } else {
+              // Fallback to R18 if no custom file in IndexedDB yet
+              setEnemyModelMode('r18');
+            }
+          });
         }
       }
     }
@@ -8667,9 +9946,14 @@
       const selectModel = (e) => {
         if (e && e.cancelable && e.type === 'touchend') e.preventDefault();
         const mode = btn.getAttribute('data-model');
-        if (mode === 'custom') {
+        if (mode === 'flip') {
+          flipCurrentModelOrientation();
+        } else if (mode === 'custom') {
           const fileInput = document.getElementById('custom-model-file-input');
-          if (fileInput) fileInput.click();
+          if (fileInput) {
+            fileInput.value = '';
+            fileInput.click();
+          }
         } else {
           setEnemyModelMode(mode);
         }
@@ -8683,13 +9967,16 @@
       customModelInput.addEventListener('change', (e) => {
         const file = e.target.files && e.target.files[0];
         if (!file) return;
+        saveCustomModelToDB(file);
         const blobUrl = URL.createObjectURL(file);
         const displayName = file.name.replace(/\.[^/.]+$/, "");
-        loadGlbEnemyModel(blobUrl, displayName, 'custom', 0);
+        const isVrmFile = file.name.toLowerCase().endsWith('.vrm');
+        loadGlbEnemyModel(blobUrl, displayName, 'custom', null, isVrmFile);
       });
     }
 
-    // Auto-initialize selected enemy model (pre-loads R18 / glb so it is immediately ready!)
+    // Auto-initialize selected enemy model & 180° flip button state
+    syncFlipButtonsUI();
     setEnemyModelMode(currentEnemyModelType);
 
     // In-game HUD time badge click
@@ -8806,7 +10093,7 @@
           pickupManager.update(delta, playerController.position);
         }
         if (currentGameMode === 'practice') {
-          trainingDummyManager.update(delta);
+          trainingDummyManager.update(delta, playerController.position);
         } else {
           enemyManager.update(delta, playerController.position);
           friendlySquad.update(delta, playerController.position, playerController.yaw);
@@ -8843,31 +10130,8 @@
       updateBloodParticles(delta);
       updateGibs(delta);
 
-      // Update VFX Tracers
-      const tracerPosAttr = tracerGeo.attributes.position;
-      let tracerIdx = 0;
-      for (let i = activeTracers.length - 1; i >= 0; i--) {
-        const tr = activeTracers[i];
-        tr.current.addScaledVector(tr.velocity, delta);
-        tr.life -= delta;
-
-        const tail = tr.current.clone().sub(tr.velocity.clone().normalize().multiplyScalar(4.5));
-        tracerPositions[tracerIdx * 6] = tr.current.x;
-        tracerPositions[tracerIdx * 6 + 1] = tr.current.y;
-        tracerPositions[tracerIdx * 6 + 2] = tr.current.z;
-        tracerPositions[tracerIdx * 6 + 3] = tail.x;
-        tracerPositions[tracerIdx * 6 + 4] = tail.y;
-        tracerPositions[tracerIdx * 6 + 5] = tail.z;
-        tracerIdx++;
-
-        if (tr.life <= 0 || tracerIdx >= MAX_TRACERS) {
-          activeTracers.splice(i, 1);
-        }
-      }
-      for (let i = tracerIdx; i < MAX_TRACERS; i++) {
-        for (let k = 0; k < 6; k++) tracerPositions[i * 6 + k] = 0;
-      }
-      tracerPosAttr.needsUpdate = true;
+      // Update 3D High-Velocity Flying Bullets & Kinetic Entry Shockwaves
+      updateFlyingBullets(delta);
 
       // Update Sparks (Orange ballistic sparks & Cyan plasma sparks)
       const sparkPosAttr = sparkGeo.attributes.position;
