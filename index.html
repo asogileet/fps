@@ -983,16 +983,16 @@
       line-height: 1.3;
     }
 
-    /* Enemy 3D Model Selection */
+    /* Enemy 3D Model Selection - Streamlined to 4 clean slots */
     .enemy-model-grid {
       display: grid;
-      grid-template-columns: repeat(6, 1fr);
-      gap: 8px;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
       margin-bottom: 22px;
     }
     @media (max-width: 650px) {
       .enemy-model-grid {
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(2, 1fr);
       }
     }
     .enemy-model-btn {
@@ -1023,6 +1023,40 @@
       border-color: #00e1ff;
       background: rgba(0, 225, 255, 0.26);
       box-shadow: 0 0 22px rgba(0, 225, 255, 0.5);
+    }
+    .model-assets-select {
+      background: rgba(6, 16, 26, 0.95);
+      border: 1px solid rgba(255, 102, 204, 0.55);
+      color: #ff88dd;
+      font-family: inherit;
+      font-size: 11px;
+      font-weight: 700;
+      border-radius: 4px;
+      padding: 3px 6px;
+      outline: none;
+      cursor: pointer;
+      width: 95%;
+      margin-top: 2px;
+      text-align: center;
+    }
+    .model-assets-select:hover, .model-assets-select:focus {
+      border-color: #00ffaa;
+      color: #00ffaa;
+      box-shadow: 0 0 10px rgba(0, 255, 170, 0.4);
+    }
+
+    /* Screen Barrel Fire Flash Vignette */
+    #barrel-fire-flash {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 18;
+      opacity: 0;
+      background: radial-gradient(circle at 75% 78%, rgba(255, 170, 40, 0.38) 0%, rgba(255, 80, 10, 0.18) 32%, rgba(255, 30, 0, 0.0) 65%);
+      transition: opacity 0.04s ease-out;
     }
 
     /* Game Mode Selection (Combat vs Zombie vs Practice) */
@@ -1730,6 +1764,7 @@
       <div class="crosshair-line crosshair-right"></div>
     </div>
     <div id="hitmarker"></div>
+    <div id="barrel-fire-flash"></div>
     <div class="reload-prompt" id="reload-prompt">按 [R] 裝填彈藥</div>
     <div class="env-toast" id="env-toast">戰場環境：中午 (NOON)</div>
 
@@ -1960,7 +1995,7 @@
           </button>
         </div>
 
-        <div class="section-label">敵軍 / 喪屍 / 假人 3D 外觀 // TARGET 3D MODEL (VRM 自動正面朝向玩家)</div>
+        <div class="section-label">敵軍 / 喪屍 / 假人 3D 外觀 // TARGET 3D MODEL (Assets 資源庫直接讀取)</div>
         <div class="enemy-model-grid">
           <button class="enemy-model-btn" id="btn-model-dummy" data-model="dummy">
             <span class="diff-name" style="color:#ffaa00">🎯 標靶假人</span>
@@ -1970,17 +2005,17 @@
             <span class="diff-name" style="color:#33aaff">🪖 戰術特戰兵</span>
             <span class="diff-desc">極速秒進・流暢 60FPS</span>
           </button>
-          <button class="enemy-model-btn" id="btn-model-glb" data-model="glb">
-            <span class="diff-name" style="color:#ff66cc">👧 泳裝 Mint (35M)</span>
-            <span class="diff-desc" id="glb-status-desc">點擊下載・動態 3D</span>
-          </button>
-          <button class="enemy-model-btn active" id="btn-model-r18" data-model="r18">
-            <span class="diff-name" style="color:#ff2a55">🔞 R18 (2.6M)</span>
-            <span class="diff-desc" id="r18-status-desc">極速秒載・無遮蔽</span>
-          </button>
-          <button class="enemy-model-btn" id="btn-model-custom" data-model="custom">
-            <span class="diff-name" style="color:#00ffaa">📂 自選模型</span>
-            <span class="diff-desc" id="custom-status-desc">上傳 .vrm / .glb</span>
+          <button class="enemy-model-btn active" id="btn-model-assets" data-model="assets">
+            <span class="diff-name" style="color:#ff66cc">💃 3D 模型 (Assets)</span>
+            <select class="model-assets-select" id="start-model-select">
+              <option value="mint">👧 泳裝 Mint (35MB)</option>
+              <option value="r18" selected>🔞 R18 女神 (2.6MB)</option>
+              <option value="waifu058">✨ Waifu058 (30MB)</option>
+              <option value="nude_girl">👗 少女 (2.2MB)</option>
+              <option value="vrm_370">🎭 VRM 角色 1 (16MB)</option>
+              <option value="vrm_454">🎀 VRM 角色 2 (17MB)</option>
+              <option value="vrm_757">🌸 VRM 角色 3 (18MB)</option>
+            </select>
           </button>
           <button class="enemy-model-btn" id="btn-model-flip" data-model="flip" title="點擊切換 180° 轉向（維持鎖定狀態，讓背對你的模型正面朝向你）">
             <span class="diff-name flip-btn-title" style="color:#00e1ff">🔄 轉向 180°</span>
@@ -2057,7 +2092,7 @@
           </button>
         </div>
 
-        <div class="section-label">調整敵軍 / 喪屍 / 假人 3D 外觀 // TARGET 3D MODEL</div>
+        <div class="section-label">調整敵軍 / 喪屍 / 假人 3D 外觀 // TARGET 3D MODEL (Assets 資源庫)</div>
         <div class="enemy-model-grid" style="margin-bottom:16px;">
           <button class="enemy-model-btn pause-model" data-model="dummy">
             <span class="diff-name" style="color:#ffaa00">🎯 標靶假人</span>
@@ -2065,14 +2100,17 @@
           <button class="enemy-model-btn pause-model" data-model="soldier">
             <span class="diff-name" style="color:#33aaff">🪖 戰術士兵</span>
           </button>
-          <button class="enemy-model-btn pause-model" data-model="glb">
-            <span class="diff-name" style="color:#ff66cc">👧 泳裝 Mint</span>
-          </button>
-          <button class="enemy-model-btn pause-model active" data-model="r18">
-            <span class="diff-name" style="color:#ff2a55">🔞 R18</span>
-          </button>
-          <button class="enemy-model-btn pause-model" data-model="custom">
-            <span class="diff-name" style="color:#00ffaa">📂 自選模型</span>
+          <button class="enemy-model-btn pause-model active" data-model="assets">
+            <span class="diff-name" style="color:#ff66cc">💃 3D 模型 (Assets)</span>
+            <select class="model-assets-select" id="pause-model-select">
+              <option value="mint">👧 泳裝 Mint (35MB)</option>
+              <option value="r18" selected>🔞 R18 女神 (2.6MB)</option>
+              <option value="waifu058">✨ Waifu058 (30MB)</option>
+              <option value="nude_girl">👗 少女 (2.2MB)</option>
+              <option value="vrm_370">🎭 VRM 角色 1 (16MB)</option>
+              <option value="vrm_454">🎀 VRM 角色 2 (17MB)</option>
+              <option value="vrm_757">🌸 VRM 角色 3 (18MB)</option>
+            </select>
           </button>
           <button class="enemy-model-btn pause-model" data-model="flip">
             <span class="diff-name flip-btn-title" style="color:#00e1ff">🔄 轉向 180°</span>
@@ -4228,22 +4266,27 @@
 
     // ----------------------------------------------------
     // 3D HIGH-VELOCITY FLYING BULLETS & HAIL OF BULLETS (子彈射出與槍林彈雨)
+    // 兼具 3D 近大遠小透視、破風音爆火衣與熾熱曳光尾跡，即使不開瞄準鏡 (Hip Fire) 也能清晰看到子彈射出與射入！
     // ----------------------------------------------------
     const MAX_FLYING_BULLETS = 80;
     const bulletMeshPool = [];
     const activeFlyingBullets = [];
 
-    // Shared Geometries & Materials for high-performance 3D Bullets
-    const bulletHeadGeo = new THREE.CylinderGeometry(0.032, 0.032, 0.28, 8);
+    // Shared Geometries & Materials for high-performance visible 3D Bullets
+    // 放大彈頭體積 (半徑由 0.032m 增至 0.095m)，長度 0.65m，確保在 65° 一般腰射視野下清晰奪目
+    const bulletHeadGeo = new THREE.CylinderGeometry(0.095, 0.095, 0.65, 8);
     bulletHeadGeo.rotateX(Math.PI / 2); // Align with Z axis
-    const bulletTipGeo = new THREE.SphereGeometry(0.032, 8, 8);
-    bulletTipGeo.translate(0, 0, -0.14); // Position at front tip
-    const bulletMachConeGeo = new THREE.ConeGeometry(0.085, 0.55, 8);
+    const bulletTipGeo = new THREE.SphereGeometry(0.095, 8, 8);
+    bulletTipGeo.translate(0, 0, -0.325); // Position at front tip
+    const bulletMachConeGeo = new THREE.ConeGeometry(0.24, 0.95, 8);
     bulletMachConeGeo.rotateX(-Math.PI / 2);
-    bulletMachConeGeo.translate(0, 0, 0.12); // Extends behind head
-    const bulletTrailGeo = new THREE.CylinderGeometry(0.014, 0.042, 2.8, 8);
+    bulletMachConeGeo.translate(0, 0, 0.25); // Extends behind head
+    const bulletTrailGeo = new THREE.CylinderGeometry(0.045, 0.16, 4.6, 8);
     bulletTrailGeo.rotateX(Math.PI / 2);
-    bulletTrailGeo.translate(0, 0, 1.45); // Trails behind bullet
+    bulletTrailGeo.translate(0, 0, 2.4); // Trails behind bullet
+
+    // Camera-facing cross-billboard planes so bullet flare stays intensely thick from ANY viewing angle
+    const bulletFlareGeo = new THREE.PlaneGeometry(0.48, 0.48);
 
     for (let i = 0; i < MAX_FLYING_BULLETS; i++) {
       const bGroup = new THREE.Group();
@@ -4258,22 +4301,31 @@
       const glowMat = new THREE.MeshBasicMaterial({
         color: 0xffaa22,
         transparent: true,
-        opacity: 0.88,
+        opacity: 0.95,
         blending: THREE.AdditiveBlending,
-        depthWrite: false
+        depthWrite: false,
+        side: THREE.DoubleSide
       });
       const machMat = new THREE.MeshBasicMaterial({
-        color: 0xffdd66,
+        color: 0xffeebb,
         transparent: true,
-        opacity: 0.42,
+        opacity: 0.65,
         blending: THREE.AdditiveBlending,
-        depthWrite: false
+        depthWrite: false,
+        side: THREE.DoubleSide
       });
 
       const headMesh = new THREE.Mesh(bulletHeadGeo, coreMat);
       const tipMesh = new THREE.Mesh(bulletTipGeo, coreMat);
       const machMesh = new THREE.Mesh(bulletMachConeGeo, machMat);
       const trailMesh = new THREE.Mesh(bulletTrailGeo, glowMat);
+
+      // Add camera-facing cross-flare blades (十字發光曳光翼)
+      const flare1 = new THREE.Mesh(bulletFlareGeo, glowMat);
+      const flare2 = new THREE.Mesh(bulletFlareGeo, glowMat);
+      flare2.rotation.z = Math.PI / 2;
+      bGroup.add(flare1);
+      bGroup.add(flare2);
 
       bGroup.add(headMesh);
       bGroup.add(tipMesh);
@@ -4289,6 +4341,8 @@
         tipMesh,
         machMesh,
         trailMesh,
+        flare1,
+        flare2,
         coreMat,
         glowMat,
         machMat,
@@ -4323,18 +4377,24 @@
 
       const isEnemy = !!options.isEnemy;
       const type = options.type || (isEnemy ? 'enemy' : 'rifle');
-      let colorHex = options.colorHex || 0xffaa22;
+      let colorHex = options.colorHex || 0xffbb33;
       let machHex = 0xffeebb;
-      let speed = options.speed || (isEnemy ? 165 : 210);
+
+      // 參考 shooting_range：飛行時間約 0.075s ~ 0.11s，讓玩家肉眼清楚看見「子彈由槍口射出、劃破長空、射入目標」
+      // 短距離時限制速度，確保至少有 4~7 幀的可見飛行軌跡
+      let speed = options.speed || (isEnemy ? 120 : 138);
+      if (totalDist < 12.0) {
+        speed = Math.max(50, totalDist / 0.088);
+      }
 
       if (type === 'blaster') {
         colorHex = 0x00f3ff;
         machHex = 0x88ffff;
-        speed = 225;
+        speed = Math.min(speed * 1.15, 175);
       } else if (isEnemy) {
         colorHex = 0xff3322;
         machHex = 0xff8866;
-        speed = 160;
+        speed = Math.min(speed, 115);
       }
 
       bItem.glowMat.color.setHex(colorHex);
@@ -4581,57 +4641,57 @@
         side: THREE.DoubleSide
       });
 
-      // 1. Central Roaring Flame Spear (中央主火舌，沿 -Z 前方猛烈噴射)
+      // 1. Central Roaring Flame Spear (中央主火舌，沿 -Z 前方猛烈噴射，擴大 1.7x)
       const spearGroup = new THREE.Group();
-      const spearOuterGeo = new THREE.ConeGeometry(0.082, 0.54, 8);
+      const spearOuterGeo = new THREE.ConeGeometry(0.14, 0.88, 8);
       spearOuterGeo.rotateX(-Math.PI / 2);
-      spearOuterGeo.translate(0, 0, -0.27);
+      spearOuterGeo.translate(0, 0, -0.44);
       const spearOuter = new THREE.Mesh(spearOuterGeo, flashMat);
       spearGroup.add(spearOuter);
 
-      const spearCoreGeo = new THREE.ConeGeometry(0.038, 0.36, 8);
+      const spearCoreGeo = new THREE.ConeGeometry(0.065, 0.58, 8);
       spearCoreGeo.rotateX(-Math.PI / 2);
-      spearCoreGeo.translate(0, 0, -0.18);
+      spearCoreGeo.translate(0, 0, -0.29);
       const spearCore = new THREE.Mesh(spearCoreGeo, coreMat);
       spearGroup.add(spearCore);
       flashGroup.add(spearGroup);
 
-      // 2. Side Muzzle Brake Flame Jets (槍帽兩側孔噴火雙翼)
+      // 2. Side Muzzle Brake Flame Jets (槍帽兩側孔噴火雙翼 - 擴大強化)
       const sideJetsGroup = new THREE.Group();
-      const jetGeo = new THREE.ConeGeometry(0.046, 0.30, 8);
+      const jetGeo = new THREE.ConeGeometry(0.075, 0.48, 8);
       jetGeo.rotateX(-Math.PI / 2);
-      jetGeo.translate(0, 0, -0.15);
+      jetGeo.translate(0, 0, -0.24);
 
       // Left Vent Jet (偏左 ~55°，微向上噴)
       const leftJet = new THREE.Mesh(jetGeo, flashMat);
       leftJet.rotation.y = Math.PI * 0.35;
       leftJet.rotation.x = -Math.PI * 0.12;
-      leftJet.position.set(-0.024, 0.012, -0.05);
+      leftJet.position.set(-0.035, 0.015, -0.06);
       sideJetsGroup.add(leftJet);
 
       // Right Vent Jet (偏右 ~55°，微向上噴)
       const rightJet = new THREE.Mesh(jetGeo, flashMat);
       rightJet.rotation.y = -Math.PI * 0.35;
       rightJet.rotation.x = -Math.PI * 0.12;
-      rightJet.position.set(0.024, 0.012, -0.05);
+      rightJet.position.set(0.035, 0.015, -0.06);
       sideJetsGroup.add(rightJet);
 
       // Top Vent Jet (上方氣孔向上噴)
       const topJet = new THREE.Mesh(jetGeo, flashMat);
-      topJet.rotation.x = -Math.PI * 0.30;
-      topJet.position.set(0, 0.026, -0.05);
+      topJet.rotation.x = -Math.PI * 0.32;
+      topJet.position.set(0, 0.038, -0.06);
       sideJetsGroup.add(topJet);
 
       flashGroup.add(sideJetsGroup);
 
-      // 3. Supersonic Shockwave Ring (槍帽口高壓音爆火環)
-      const ringGeo = new THREE.RingGeometry(0.065, 0.12, 16);
+      // 3. Supersonic Shockwave Ring (槍帽口高壓音爆火環 - 擴大)
+      const ringGeo = new THREE.RingGeometry(0.09, 0.22, 16);
       const ringMesh = new THREE.Mesh(ringGeo, ringMat);
-      ringMesh.position.set(0, 0, -0.08);
+      ringMesh.position.set(0, 0, -0.10);
       flashGroup.add(ringMesh);
 
-      // 4. Multi-pointed Starburst Cross Planes (星芒十字爆閃)
-      const planeGeo = new THREE.PlaneGeometry(0.38, 0.38);
+      // 4. Multi-pointed Starburst Cross Planes (星芒十字爆閃 - 擴大)
+      const planeGeo = new THREE.PlaneGeometry(0.68, 0.68);
       const p1 = new THREE.Mesh(planeGeo, flashMat);
       flashGroup.add(p1);
       const p2 = new THREE.Mesh(planeGeo, flashMat);
@@ -4642,13 +4702,13 @@
       flashGroup.add(p3);
 
       // Center Incandescent Plasma Sphere
-      const core = new THREE.Mesh(new THREE.SphereGeometry(0.062, 8, 8), coreMat);
+      const core = new THREE.Mesh(new THREE.SphereGeometry(0.095, 8, 8), coreMat);
       flashGroup.add(core);
 
       flashGroup.visible = false;
       flashGroup.userData = {
         life: 0,
-        maxLife: 0.075,
+        maxLife: 0.095,
         baseScale: 1.0,
         ringMesh,
         spearGroup,
@@ -4660,19 +4720,28 @@
       return flashGroup;
     }
 
-    function triggerMuzzleFlash(flashMesh, baseScale = 1.0) {
+    function triggerMuzzleFlash(flashMesh, baseScale = 1.0, isPlayer = false) {
       if (!flashMesh) return;
       flashMesh.visible = true;
-      const s = baseScale * (1.18 + Math.random() * 0.62);
+      const s = baseScale * (1.25 + Math.random() * 0.65);
       flashMesh.scale.set(s, s, s);
       flashMesh.rotation.z = Math.random() * Math.PI * 2;
-      flashMesh.userData.life = 0.075; // 75ms flash duration
-      flashMesh.userData.maxLife = 0.075;
+      flashMesh.userData.life = 0.095; // 95ms flash duration
+      flashMesh.userData.maxLife = 0.095;
       flashMesh.userData.baseScale = s;
 
       if (flashMesh.userData.ringMesh) {
         flashMesh.userData.ringMesh.scale.set(0.65, 0.65, 1.0);
         flashMesh.userData.ringMat.opacity = 0.95;
+      }
+
+      // If fired by player, trigger momentary screen flash vignette
+      if (isPlayer) {
+        const bFlash = document.getElementById('barrel-fire-flash');
+        if (bFlash) {
+          bFlash.style.opacity = '1';
+          setTimeout(() => { bFlash.style.opacity = '0'; }, 65);
+        }
       }
     }
 
@@ -4689,7 +4758,7 @@
 
           // Expand supersonic shockwave ring
           if (flashMesh.userData.ringMesh) {
-            const rScale = 0.7 + (1.0 - p) * 2.8;
+            const rScale = 0.7 + (1.0 - p) * 3.5;
             flashMesh.userData.ringMesh.scale.set(rScale, rScale, 1.0);
             flashMesh.userData.ringMat.opacity = 0.95 * ease;
           }
@@ -5434,27 +5503,42 @@
     }
 
     // ----------------------------------------------------
-    // GLB / VRM CUSTOM ENEMY MODEL SYSTEM
+    // GLB / VRM CUSTOM ENEMY MODEL SYSTEM (直接讀取 assets 資料夾模型)
     // ----------------------------------------------------
     let currentEnemyModelType = 'r18';
+    let currentAssetModelKey = 'r18';
     let isModelFlipped180 = false;
     try {
       const savedModel = localStorage.getItem('fps_enemy_model');
       if (savedModel) currentEnemyModelType = savedModel;
+      const savedAsset = localStorage.getItem('fps_asset_model');
+      if (savedAsset) currentAssetModelKey = savedAsset;
       const savedFlip = localStorage.getItem('fps_model_flip_180');
       if (savedFlip === '1') isModelFlipped180 = true;
     } catch (e) {}
     let cachedGlbData = null;
     let isGlbLoading = false;
-    const DEFAULT_GLB_PATH = './assets/mint_swimsuit_animated-_neverness_to_everness.glb';
-    const R18_GLB_PATH = './assets/adult-base-nude-woman/source/model.glb';
 
-    // Model cache for instant switching between soldier, glb, r18, and custom
-    const modelCache = {
-      glb: null,
-      r18: null,
-      custom: null
+    // Direct Assets Models Directory Registry
+    const ASSET_MODELS = {
+      'mint': { path: './assets/mint_swimsuit_animated-_neverness_to_everness.glb', name: '泳裝 Mint', isVrm: false },
+      'r18': { path: './assets/adult-base-nude-woman/source/model.glb', name: '🔞 R18 女神', isVrm: false },
+      'waifu058': { path: './assets/waifu058.glb', name: '✨ Waifu058', isVrm: false },
+      'nude_girl': { path: './assets/nude_girl_t_pose_0310125114_texture_fbx.glb', name: '👗 少女', isVrm: false },
+      'vrm_370': { path: './assets/3701177734330791136.vrm', name: '🎭 VRM 角色 1', isVrm: true },
+      'vrm_454': { path: './assets/4545181317143147191.vrm', name: '🎀 VRM 角色 2', isVrm: true },
+      'vrm_757': { path: './assets/7573905398650336967.vrm', name: '🌸 VRM 角色 3', isVrm: true }
     };
+
+    const DEFAULT_GLB_PATH = ASSET_MODELS['mint'].path;
+    const R18_GLB_PATH = ASSET_MODELS['r18'].path;
+
+    // Model cache for instant switching between dummy, soldier, and assets models
+    const modelCache = {
+      dummy: null,
+      soldier: null
+    };
+    Object.keys(ASSET_MODELS).forEach(k => { modelCache[k] = null; });
 
     // IndexedDB helper to persist uploaded .vrm / .glb across browser reloads
     function openCustomModelDB() {
@@ -5519,10 +5603,11 @@
     }
 
     function highlightModelButtons(mode) {
+      const activeKey = (mode === 'dummy' || mode === 'soldier') ? mode : 'assets';
       document.querySelectorAll('.enemy-model-btn').forEach(btn => {
         const m = btn.getAttribute('data-model');
         if (m === 'flip') return; // Never clear the independent 180° flip toggle button!
-        btn.classList.toggle('active', m === mode);
+        btn.classList.toggle('active', m === activeKey);
       });
       syncFlipButtonsUI();
     }
@@ -9295,13 +9380,14 @@
 
         playerFlashLight.position.copy(this.position);
         playerFlashLight.color.setHex(config.muzzleColor);
-        playerFlashLight.intensity = config.isEnergy ? 14.0 : 11.5;
+        playerFlashLight.intensity = config.isEnergy ? 16.0 : 13.5;
         const fovRatio = (camera.fov / 65);
-        const recoilDelta = (config.isEnergy ? 0.016 : 0.022) * (this.isADS ? fovRatio * 0.40 : 1.0);
-        this.recoilPitch = Math.min(0.12 * (this.isADS ? fovRatio : 1.0), this.recoilPitch + recoilDelta);
-        activeWeaponModel.gun.position.z += (config.isEnergy ? 0.035 : 0.045) * (this.isADS ? 0.2 : 1.0);
+        const recoilDelta = (config.isEnergy ? 0.024 : 0.032) * (this.isADS ? fovRatio * 0.40 : 1.0);
+        this.recoilPitch = Math.min(0.18 * (this.isADS ? fovRatio : 1.0), this.recoilPitch + recoilDelta);
+        // Punchy weapon kickback along Z axis
+        activeWeaponModel.gun.position.z += (config.isEnergy ? 0.065 : 0.082) * (this.isADS ? 0.35 : 1.0);
 
-        triggerMuzzleFlash(activeWeaponModel.muzzleFlash, config.isEnergy ? 1.25 : 1.35);
+        triggerMuzzleFlash(activeWeaponModel.muzzleFlash, config.isEnergy ? 1.45 : 1.65, true);
         spawnMuzzleSparks(muzzleWorld, raycaster.ray.direction, config.isEnergy ? 28 : 26, config.isEnergy ? 'cyan' : 'orange');
 
         const enemyHitTargets = [];
@@ -9881,11 +9967,27 @@
     });
 
     // Enemy / Practice Dummy 3D Model selection buttons (both start and pause modals)
-    function setEnemyModelMode(mode) {
+    function setEnemyModelMode(mode, specificAssetKey = null) {
+      if (mode === 'glb' || mode === 'r18') {
+        currentAssetModelKey = (mode === 'glb' ? 'mint' : 'r18');
+        mode = 'assets';
+      }
+      if (specificAssetKey && ASSET_MODELS[specificAssetKey]) {
+        currentAssetModelKey = specificAssetKey;
+        mode = 'assets';
+      }
       currentEnemyModelType = mode;
       try {
         localStorage.setItem('fps_enemy_model', mode);
+        localStorage.setItem('fps_asset_model', currentAssetModelKey);
       } catch (e) {}
+
+      // Sync both dropdowns
+      const selStart = document.getElementById('start-model-select');
+      const selPause = document.getElementById('pause-model-select');
+      if (selStart) selStart.value = currentAssetModelKey;
+      if (selPause) selPause.value = currentAssetModelKey;
+
       highlightModelButtons(mode);
 
       const refreshActiveTargets = (defaultCount) => {
@@ -9904,46 +10006,32 @@
       } else if (mode === 'soldier') {
         showPickupToast('🪖 3D 外觀已切換為：戰術特戰士兵');
         refreshActiveTargets(24);
-      } else if (mode === 'glb') {
-        if (modelCache['glb']) {
-          cachedGlbData = modelCache['glb'];
-          showPickupToast('👧 3D 外觀已切換為：' + cachedGlbData.name);
+      } else if (mode === 'assets') {
+        const item = ASSET_MODELS[currentAssetModelKey] || ASSET_MODELS['r18'];
+        if (modelCache[currentAssetModelKey]) {
+          cachedGlbData = modelCache[currentAssetModelKey];
+          showPickupToast('💃 3D 外觀已切換為：' + cachedGlbData.name);
           refreshActiveTargets(8);
         } else {
-          loadGlbEnemyModel(DEFAULT_GLB_PATH, '泳裝 Mint', 'glb', 0, false);
-        }
-      } else if (mode === 'r18') {
-        if (modelCache['r18']) {
-          cachedGlbData = modelCache['r18'];
-          showPickupToast('🔞 3D 外觀已切換為：' + cachedGlbData.name);
-          refreshActiveTargets(8);
-        } else {
-          loadGlbEnemyModel(R18_GLB_PATH, '🔞 R18 無遮蔽', 'r18', 0, false);
-        }
-      } else if (mode === 'custom') {
-        if (modelCache['custom']) {
-          cachedGlbData = modelCache['custom'];
-          showPickupToast('📂 3D 外觀已切換為：' + cachedGlbData.name);
-          refreshActiveTargets(8);
-        } else {
-          loadCustomModelFromDB().then((saved) => {
-            if (saved && saved.file) {
-              const blobUrl = URL.createObjectURL(saved.file);
-              const fname = saved.name || saved.file.name || '自訂VRM';
-              const displayName = fname.replace(/\.[^/.]+$/, "");
-              const isVrmFile = fname.toLowerCase().endsWith('.vrm');
-              loadGlbEnemyModel(blobUrl, displayName, 'custom', null, isVrmFile);
-            } else {
-              // Fallback to R18 if no custom file in IndexedDB yet
-              setEnemyModelMode('r18');
-            }
-          });
+          loadGlbEnemyModel(item.path, item.name, currentAssetModelKey, null, item.isVrm);
         }
       }
     }
 
+    // Attach event listeners to model selection dropdowns
+    function onModelSelectChange(e) {
+      const chosen = e.target.value;
+      setEnemyModelMode('assets', chosen);
+    }
+    const selStartEl = document.getElementById('start-model-select');
+    if (selStartEl) selStartEl.addEventListener('change', onModelSelectChange);
+    const selPauseEl = document.getElementById('pause-model-select');
+    if (selPauseEl) selPauseEl.addEventListener('change', onModelSelectChange);
+
     document.querySelectorAll('.enemy-model-btn[data-model]').forEach(btn => {
       const selectModel = (e) => {
+        // Prevent click when user is interacting with the dropdown inside the button
+        if (e.target && e.target.tagName === 'SELECT') return;
         if (e && e.cancelable && e.type === 'touchend') e.preventDefault();
         const mode = btn.getAttribute('data-model');
         if (mode === 'flip') {
@@ -9977,7 +10065,7 @@
 
     // Auto-initialize selected enemy model & 180° flip button state
     syncFlipButtonsUI();
-    setEnemyModelMode(currentEnemyModelType);
+    setEnemyModelMode(currentEnemyModelType, currentAssetModelKey);
 
     // In-game HUD time badge click
     const hudTimeBadge = document.getElementById('time-hud-badge');
