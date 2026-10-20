@@ -615,6 +615,17 @@
       z-index: 25;
     }
 
+    /* 2D Screen-space Bullet / Tracer Overlay (shooting_range style 子彈射出與射入) — below scope mask (z 21) */
+    #bullet-overlay-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 20;
+    }
+
     /* Radar Widget (Top Left) */
     #radar-container {
       position: relative;
@@ -1705,6 +1716,7 @@
   <div id="game-container">
     <canvas id="canvas3d"></canvas>
     <canvas id="saber-slash-canvas"></canvas>
+    <canvas id="bullet-overlay-canvas"></canvas>
     <div class="vignette-layer"></div>
     <div class="damage-overlay" id="damage-overlay"></div>
     <div id="damage-dir-indicator"><div class="damage-dir-chevron"></div></div>
@@ -3171,7 +3183,8 @@
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = TIME_PRESETS.noon.exposure;
     renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    // PERF: PCFSoftShadowMap 每個像素要做大量陰影取樣，改用 PCFShadowMap (視覺差異很小，速度快很多)
+    renderer.shadowMap.type = THREE.PCFShadowMap;
 
     function resize() {
       const w = window.innerWidth;
@@ -4129,6 +4142,7 @@
     const streetLightGroup = new THREE.Group();
     const streetLightSources = [];
     const streetLightBulbs = [];
+    const streetLightAnchors = [];
 
     const poleMat = new THREE.MeshStandardMaterial({ color: 0x2e3440, roughness: 0.5, metalness: 0.7 });
 
@@ -4164,11 +4178,9 @@
       lamp.add(bulb);
       streetLightBulbs.push(bulb);
 
-      // PointLight illuminating the road & cover positions
-      const pLight = new THREE.PointLight(0xffdf88, 0, 28, 1.5);
-      pLight.position.set(fixtureX, 6.4, 0);
-      lamp.add(pLight);
-      streetLightSources.push(pLight);
+      // PERF: 不再每盞路燈各放一顆 PointLight (原本 26 顆，即使亮度 0 也會讓所有材質逐像素計算 26 盞燈)。
+      // 只記錄燈泡世界座標，由 updateStreetLightPool() 把少量共用 PointLight 移到玩家附近最近的路燈上。
+      streetLightAnchors.push(new THREE.Vector3(x + fixtureX, 6.4, z));
 
       lamp.position.set(x, 0, z);
       streetLightGroup.add(lamp);
@@ -4188,6 +4200,32 @@
     }
 
     scene.add(streetLightGroup);
+
+    // Shared pool of street PointLights placed at the lamps nearest to the player
+    const STREET_LIGHT_POOL_SIZE = 4;
+    for (let i = 0; i < STREET_LIGHT_POOL_SIZE; i++) {
+      const pLight = new THREE.PointLight(0xffdf88, 0, 28, 1.5);
+      pLight.visible = false; // Only enabled at night (toggled once in setTimeOfDay)
+      scene.add(pLight);
+      streetLightSources.push(pLight);
+    }
+
+    const _streetLightSort = [];
+    let _streetLightTick = 0;
+    function updateStreetLightPool(playerPos) {
+      if (!playerPos || !streetLightSources.length || !streetLightSources[0].visible) return;
+      if ((_streetLightTick++ % 10) !== 0) return; // Re-pick nearest lamps every 10 frames
+      _streetLightSort.length = 0;
+      for (const a of streetLightAnchors) {
+        const dx = a.x - playerPos.x, dz = a.z - playerPos.z;
+        _streetLightSort.push({ a, d: dx * dx + dz * dz });
+      }
+      _streetLightSort.sort((p, q) => p.d - q.d);
+      for (let i = 0; i < streetLightSources.length; i++) {
+        const entry = _streetLightSort[i];
+        if (entry) streetLightSources[i].position.copy(entry.a);
+      }
+    }
 
     // ----------------------------------------------------
     // ENVIRONMENT SWITCHING ENGINE
@@ -4232,7 +4270,10 @@
       const isNight = currentTimeOfDay === 'night';
       streetLightSources.forEach(l => {
         l.intensity = isNight ? 2.6 : 0;
+        l.visible = isNight; // Day: lights fully removed from shader light count
       });
+      _streetLightTick = 0;
+      if (typeof playerController !== 'undefined' && playerController) updateStreetLightPool(playerController.position);
       streetLightBulbs.forEach(b => {
         b.material.color.setHex(isNight ? 0xffea95 : 0x555555);
       });
@@ -4400,6 +4441,16 @@
       bItem.glowMat.color.setHex(colorHex);
       bItem.machMat.color.setHex(machHex);
 
+      // Player rifle bullets: drawn by the 2D screen-space overlay exactly like shooting_range
+      // (3D bullet mesh hidden; it still flies invisibly so the impact timing stays in sync with the overlay).
+      const useOverlay = !!options.fromPlayer && type !== 'blaster';
+      if (useOverlay) {
+        const flightDuration = 0.068 + Math.random() * 0.022 + Math.min(0.06, totalDist * 0.0008);
+        speed = Math.max(1, totalDist / flightDuration);
+        group.visible = false;
+        spawnOverlayBullet(to, flightDuration, options.colorHex);
+      }
+
       activeFlyingBullets.push({
         item: bItem,
         currentPos: from.clone(),
@@ -4422,6 +4473,249 @@
         type: isEnemy ? 'enemy' : 'rifle',
         colorHex: isEnemy ? 0xff3322 : 0xffbb44
       });
+    }
+
+    // ----------------------------------------------------
+    // 2D SCREEN-SPACE BULLET OVERLAY (移植 shooting_range 的子彈射出/射入畫法)
+    // 3D 子彈幾乎沿著視線飛行，投影到螢幕上只是準心附近的小點；
+    // 這裡把「當下槍口」與「命中點」投影成螢幕座標，再用 shooting_range 的 2D 畫法畫出
+    // 大彈頭 + 音爆錐 + 三層曳光尾跡 + 出膛氣浪環 + 射入閃光，腰射也能清楚看到子彈飛出去。
+    // ----------------------------------------------------
+    const bulletOverlayCanvas = document.getElementById('bullet-overlay-canvas');
+    const bulletOverlayCtx = bulletOverlayCanvas ? bulletOverlayCanvas.getContext('2d') : null;
+    const overlayBullets = [];
+    const overlayImpacts = [];
+    let overlayDpr = 1;
+    const _ovA = new THREE.Vector3();
+    const _ovB = new THREE.Vector3();
+
+    function resizeBulletOverlay() {
+      if (!bulletOverlayCanvas) return;
+      overlayDpr = Math.min(window.devicePixelRatio || 1, 2);
+      bulletOverlayCanvas.width = Math.round(window.innerWidth * overlayDpr);
+      bulletOverlayCanvas.height = Math.round(window.innerHeight * overlayDpr);
+    }
+    window.addEventListener('resize', resizeBulletOverlay);
+    resizeBulletOverlay();
+
+    function hexToCss(hex, fallback) {
+      if (hex === undefined || hex === null) return fallback;
+      return '#' + (hex >>> 0).toString(16).padStart(6, '0').slice(-6);
+    }
+
+    // Projects a world point to CSS-pixel screen coordinates. Returns null if behind the camera.
+    function projectToScreen(worldPos, out) {
+      _ovA.copy(worldPos).project(camera);
+      if (_ovA.z > 1 || _ovA.z < -1) return null;
+      out.x = (_ovA.x * 0.5 + 0.5) * window.innerWidth;
+      out.y = (-_ovA.y * 0.5 + 0.5) * window.innerHeight;
+      return out;
+    }
+
+    function spawnOverlayBullet(targetWorld, flightDuration, colorHex) {
+      if (!bulletOverlayCtx) return;
+      if (overlayBullets.length > 40) overlayBullets.shift();
+      overlayBullets.push({
+        target: targetWorld.clone(),
+        progress: 0,
+        flightDuration,
+        color: hexToCss(colorHex, '#ffaa00'),
+        // Small muzzle jitter so rapid-fire rounds look layered (槍林彈雨)
+        jx: (Math.random() - 0.5) * 8,
+        jy: (Math.random() - 0.5) * 8,
+        size: 1.1
+      });
+    }
+
+    function drawOverlayBullet(ctx, b, sx, sy, tx, ty, uiScale) {
+      const p = b.progress;
+      const angle = Math.atan2(ty - sy, tx - sx);
+      const x = sx + (tx - sx) * p;
+      const y = sy + (ty - sy) * p;
+      // 3D 透視比例：剛出膛較大 (2.15x)，飛向目標縮小至 (0.95x)
+      const persp = (2.15 - p * 1.2) * b.size * uiScale;
+
+      const tailP = Math.max(0, p - 0.42);
+      const tailX = sx + (tx - sx) * tailP;
+      const tailY = sy + (ty - sy) * tailP;
+
+      ctx.save();
+
+      // 1. 出膛氣浪環
+      if (p < 0.48) {
+        const ringAlpha = (1 - p / 0.48) * 0.7;
+        const ringX = sx + (tx - sx) * (p * 0.35);
+        const ringY = sy + (ty - sy) * (p * 0.35);
+        ctx.save();
+        ctx.translate(ringX, ringY);
+        ctx.rotate(angle);
+        ctx.strokeStyle = `rgba(255, 220, 130, ${ringAlpha})`;
+        ctx.lineWidth = 2 * persp;
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 5 * persp, (14 + p * 35) * persp, 0, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      // 2. 三層曳光尾跡
+      const gradOuter = ctx.createLinearGradient(tailX, tailY, x, y);
+      gradOuter.addColorStop(0, 'rgba(255, 80, 0, 0)');
+      gradOuter.addColorStop(0.5, 'rgba(255, 120, 10, 0.35)');
+      gradOuter.addColorStop(1, b.color);
+      ctx.strokeStyle = gradOuter;
+      ctx.lineWidth = 8.5 * persp;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(tailX, tailY);
+      ctx.lineTo(x, y);
+      ctx.stroke();
+
+      const gradMid = ctx.createLinearGradient(tailX, tailY, x, y);
+      gradMid.addColorStop(0, 'rgba(255, 200, 50, 0)');
+      gradMid.addColorStop(1, '#ffee77');
+      ctx.strokeStyle = gradMid;
+      ctx.lineWidth = 4 * persp;
+      ctx.beginPath();
+      ctx.moveTo(tailX, tailY);
+      ctx.lineTo(x, y);
+      ctx.stroke();
+
+      const midP = Math.max(0, p - 0.22);
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1.8 * persp;
+      ctx.beginPath();
+      ctx.moveTo(sx + (tx - sx) * midP, sy + (ty - sy) * midP);
+      ctx.lineTo(x, y);
+      ctx.stroke();
+
+      // 3. 彈頭 + 音爆錐
+      ctx.translate(x, y);
+      ctx.rotate(angle);
+      const bLen = 22 * persp;
+      const bRad = 4.2 * persp;
+
+      const coneGrad = ctx.createLinearGradient(bLen * 0.6, 0, -bLen * 1.1, 0);
+      coneGrad.addColorStop(0, 'rgba(255, 255, 255, 0.95)');
+      coneGrad.addColorStop(0.35, 'rgba(255, 160, 20, 0.65)');
+      coneGrad.addColorStop(1, 'rgba(255, 60, 0, 0)');
+      ctx.fillStyle = coneGrad;
+      ctx.beginPath();
+      ctx.moveTo(bLen * 0.75, 0);
+      ctx.lineTo(-bLen * 1.0, -bRad * 2.4);
+      ctx.lineTo(-bLen * 0.5, 0);
+      ctx.lineTo(-bLen * 1.0, bRad * 2.4);
+      ctx.closePath();
+      ctx.fill();
+
+      const bulletGrad = ctx.createLinearGradient(0, -bRad, 0, bRad);
+      bulletGrad.addColorStop(0, '#fff6cc');
+      bulletGrad.addColorStop(0.35, '#f1c40f');
+      bulletGrad.addColorStop(0.75, '#d35400');
+      bulletGrad.addColorStop(1, '#6e2c00');
+      ctx.fillStyle = bulletGrad;
+      ctx.beginPath();
+      ctx.moveTo(-bLen * 0.55, -bRad);
+      ctx.lineTo(bLen * 0.1, -bRad);
+      ctx.quadraticCurveTo(bLen * 0.55, -bRad * 0.6, bLen * 0.7, 0);
+      ctx.quadraticCurveTo(bLen * 0.55, bRad * 0.6, bLen * 0.1, bRad);
+      ctx.lineTo(-bLen * 0.55, bRad);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.85)';
+      ctx.lineWidth = Math.max(1, 1.2 * persp);
+      ctx.beginPath();
+      ctx.moveTo(-bLen * 0.45, -bRad * 0.5);
+      ctx.lineTo(bLen * 0.45, -bRad * 0.2);
+      ctx.stroke();
+
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(-bLen * 0.55, 0, bRad * 0.9, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.restore();
+    }
+
+    const _ovStart = { x: 0, y: 0 };
+    const _ovEnd = { x: 0, y: 0 };
+    const _ovMuzzle = new THREE.Vector3();
+
+    function renderBulletOverlay(delta) {
+      if (!bulletOverlayCtx) return;
+      const ctx = bulletOverlayCtx;
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.clearRect(0, 0, bulletOverlayCanvas.width, bulletOverlayCanvas.height);
+      if (!overlayBullets.length && !overlayImpacts.length) return;
+      ctx.setTransform(overlayDpr, 0, 0, overlayDpr, 0, 0);
+
+      const uiScale = Math.max(0.6, Math.min(1.4, window.innerHeight / 900));
+
+      // Bullets always leave from the CURRENT gun muzzle (tracks recoil / turning like shooting_range)
+      let haveMuzzle = false;
+      if (typeof activeWeaponModel !== 'undefined' && activeWeaponModel && activeWeaponModel.muzzleAnchor) {
+        activeWeaponModel.muzzleAnchor.getWorldPosition(_ovMuzzle);
+        haveMuzzle = !!projectToScreen(_ovMuzzle, _ovStart);
+      }
+      if (!haveMuzzle) {
+        _ovStart.x = window.innerWidth * 0.68;
+        _ovStart.y = window.innerHeight * 0.82;
+      }
+
+      for (let i = overlayBullets.length - 1; i >= 0; i--) {
+        const b = overlayBullets[i];
+        b.progress += delta / b.flightDuration;
+        const end = projectToScreen(b.target, _ovEnd);
+        if (b.progress >= 1.0 || !end) {
+          if (end) {
+            overlayImpacts.push({ world: b.target, life: 0.14, maxLife: 0.14, color: b.color, seed: Math.random() * Math.PI });
+          }
+          overlayBullets.splice(i, 1);
+          continue;
+        }
+        drawOverlayBullet(ctx, b, _ovStart.x + b.jx, _ovStart.y + b.jy, end.x, end.y, uiScale);
+      }
+
+      // 射入閃光：命中點的星芒爆閃 + 擴散衝擊環
+      ctx.globalCompositeOperation = 'lighter';
+      for (let i = overlayImpacts.length - 1; i >= 0; i--) {
+        const im = overlayImpacts[i];
+        im.life -= delta;
+        const end = projectToScreen(im.world, _ovEnd);
+        if (im.life <= 0 || !end) { overlayImpacts.splice(i, 1); continue; }
+        const k = im.life / im.maxLife;
+        const r = (6 + (1 - k) * 22) * uiScale;
+        const glow = ctx.createRadialGradient(end.x, end.y, 0, end.x, end.y, r * 1.6);
+        glow.addColorStop(0, `rgba(255, 255, 255, ${0.95 * k})`);
+        glow.addColorStop(0.3, `rgba(255, 210, 90, ${0.75 * k})`);
+        glow.addColorStop(1, 'rgba(255, 90, 0, 0)');
+        ctx.fillStyle = glow;
+        ctx.beginPath();
+        ctx.arc(end.x, end.y, r * 1.6, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.save();
+        ctx.translate(end.x, end.y);
+        ctx.rotate(im.seed);
+        ctx.strokeStyle = `rgba(255, 240, 180, ${k})`;
+        ctx.lineWidth = 2 * uiScale;
+        ctx.beginPath();
+        for (let s = 0; s < 4; s++) {
+          const a = s * Math.PI / 4;
+          const len = r * (s % 2 ? 1.0 : 1.7);
+          ctx.moveTo(-Math.cos(a) * len, -Math.sin(a) * len);
+          ctx.lineTo(Math.cos(a) * len, Math.sin(a) * len);
+        }
+        ctx.stroke();
+        ctx.restore();
+
+        ctx.strokeStyle = `rgba(255, 200, 80, ${0.8 * k})`;
+        ctx.lineWidth = 1.6 * uiScale;
+        ctx.beginPath();
+        ctx.arc(end.x, end.y, r * (1.2 + (1 - k) * 1.2), 0, Math.PI * 2);
+        ctx.stroke();
+      }
+      ctx.globalCompositeOperation = 'source-over';
     }
 
     // ----------------------------------------------------
@@ -5209,6 +5503,11 @@
     const fpBlaster = createFirstPersonBlaster();
     const fpRocket = createFirstPersonRocket();
     const fpSaber = createFirstPersonSaber();
+    // PERF: re-parent the saber PointLight to the always-visible weaponHolder so hiding the saber on weapon switch
+    // does not change the scene light count (which would trigger a full shader recompile hitch). Intensity 0 when unused.
+    weaponHolder.add(fpSaber.bladeLight);
+    fpSaber.bladeLight.position.set(0.2, -0.05, -0.9);
+    fpSaber.bladeLight.intensity = 0;
 
     weaponHolder.add(fpRifle.gun);
     weaponHolder.add(fpBlaster.gun);
@@ -5443,13 +5742,13 @@
 
       guideRaycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
 
+      // PERF: 每幀執行的導引雷射只對簡化碰撞體做射線判定，不再對高模骨架網格 (visual) 做 CPU 蒙皮射線運算
       const targets = [];
       for (const e of enemyManager.enemies) {
         if (e.alive) {
           targets.push(e.mesh.head);
           targets.push(e.mesh.torso);
           if (e.mesh.bodyCylinder) targets.push(e.mesh.bodyCylinder);
-          if (e.mesh.visual) targets.push(e.mesh.visual);
         }
       }
       if (typeof trainingDummyManager !== 'undefined') {
@@ -5458,7 +5757,6 @@
             targets.push(d.mesh.head);
             targets.push(d.mesh.torso);
             if (d.mesh.bodyCylinder) targets.push(d.mesh.bodyCylinder);
-            if (d.mesh.visual) targets.push(d.mesh.visual);
           }
         }
       }
@@ -6018,6 +6316,32 @@
         vrmBones,
         isGlb: true
       };
+    }
+
+    // PERF: distance-based shadow LOD for heavy GLB/VRM characters.
+    // Only characters near the player cast shadows; far ones skip the extra skinned shadow-map pass.
+    const CHARACTER_SHADOW_DIST = 26;
+    let _shadowLodTick = 0;
+    function updateCharacterShadowLOD(playerPos) {
+      if (!playerPos || (_shadowLodTick++ % 12) !== 0) return;
+      const maxD2 = CHARACTER_SHADOW_DIST * CHARACTER_SHADOW_DIST;
+      const apply = (list) => {
+        for (const ent of list) {
+          const m = ent && ent.mesh;
+          if (!m || !m.visual || !m.root) continue;
+          if (!m._shadowMeshes) {
+            m._shadowMeshes = [];
+            m.visual.traverse(c => { if (c.isMesh && !c.userData.isDecal) m._shadowMeshes.push(c); });
+          }
+          const dx = m.root.position.x - playerPos.x, dz = m.root.position.z - playerPos.z;
+          const cast = (dx * dx + dz * dz) < maxD2;
+          if (m._shadowCast === cast) continue;
+          m._shadowCast = cast;
+          for (const c of m._shadowMeshes) c.castShadow = cast;
+        }
+      };
+      if (typeof enemyManager !== 'undefined') apply(enemyManager.enemies);
+      if (typeof trainingDummyManager !== 'undefined') apply(trainingDummyManager.dummies);
     }
 
     // ----------------------------------------------------
@@ -7728,7 +8052,7 @@
           if (e.alive) {
             targets.push(e.mesh.head, e.mesh.torso, e.mesh.leftLeg, e.mesh.rightLeg);
             if (e.mesh.bodyCylinder) targets.push(e.mesh.bodyCylinder);
-            if (e.mesh.visual) targets.push(e.mesh.visual);
+            // PERF: 火箭每幀碰撞只用簡化碰撞體，不對高模 visual 做射線
           }
         }
         targets.push(...sceneCollidables);
@@ -7861,6 +8185,27 @@
       depthWrite: false
     });
 
+    // PERF: fixed pool of explosion lights, always in the scene (intensity 0 when idle).
+    // Adding/removing lights changes the light count and forces every material's shader to recompile → big frame hitch.
+    const EXPLOSION_LIGHT_POOL = [];
+    for (let i = 0; i < 2; i++) {
+      const l = new THREE.PointLight(0xff7711, 0, 45, 1.4);
+      l.userData.inUse = false;
+      scene.add(l);
+      EXPLOSION_LIGHT_POOL.push(l);
+    }
+    let _expLightRR = 0;
+    function acquireExplosionLight() {
+      let l = EXPLOSION_LIGHT_POOL.find(x => !x.userData.inUse);
+      if (!l) {
+        l = EXPLOSION_LIGHT_POOL[_expLightRR++ % EXPLOSION_LIGHT_POOL.length];
+        // Steal from an older explosion still fading
+        for (const ex of activeExplosions) if (ex.light === l) ex.light = { intensity: 0, userData: {} };
+      }
+      l.userData.inUse = true;
+      return l;
+    }
+
     function triggerExplosion(center, radius = 8.5, maxDamage = 300, isLethal = true) {
       audio.playExplosion();
 
@@ -7876,10 +8221,10 @@
       ring.rotation.x = -Math.PI / 2;
       scene.add(ring);
 
-      // Bright Light Flash
-      const expLight = new THREE.PointLight(0xff7711, 24, 45, 1.4);
+      // Bright Light Flash (PERF: reuse pooled PointLight instead of adding a new light → no shader recompilation stutter)
+      const expLight = acquireExplosionLight();
       expLight.position.copy(center);
-      scene.add(expLight);
+      expLight.intensity = 24;
 
       activeExplosions.push({
         sphere,
@@ -7983,7 +8328,8 @@
         if (exp.life <= 0) {
           scene.remove(exp.sphere);
           scene.remove(exp.ring);
-          scene.remove(exp.light);
+          exp.light.intensity = 0;
+          exp.light.userData.inUse = false;
           activeExplosions.splice(i, 1);
         }
       }
@@ -9198,6 +9544,7 @@
             fpSaber.bladeLight.intensity = 3.5;
           }
         } else {
+          fpSaber.bladeLight.intensity = 0;
           const targetPos = this.isADS ? WEAPON_ADS_POS : WEAPON_HIP_POS;
           activeWeaponModel.gun.position.lerp(targetPos, 16 * delta);
         }
@@ -9390,6 +9737,9 @@
         triggerMuzzleFlash(activeWeaponModel.muzzleFlash, config.isEnergy ? 1.45 : 1.65, true);
         spawnMuzzleSparks(muzzleWorld, raycaster.ray.direction, config.isEnergy ? 28 : 26, config.isEnergy ? 'cyan' : 'orange');
 
+        // PERF: 第一階段只對簡化碰撞體 (hitbox) 做射線判定。
+        // 以前會把每隻人偶的高模骨架網格 (visual) 一起遞迴判定，three.js 需在 CPU 逐頂點套用骨骼蒙皮，
+        // 16~40 隻高模人偶 × 每秒多發 → 開槍嚴重卡頓。
         const enemyHitTargets = [];
         for (const e of enemyManager.enemies) {
           if (e.alive || e.isCorpse) {
@@ -9399,9 +9749,6 @@
             }
             if (e.mesh.bodyCylinder) {
               enemyHitTargets.push(e.mesh.bodyCylinder);
-            }
-            if (e.mesh.visual) {
-              enemyHitTargets.push(e.mesh.visual);
             }
           }
         }
@@ -9416,14 +9763,31 @@
             if (d.mesh.bodyCylinder) {
               dummyHitTargets.push(d.mesh.bodyCylinder);
             }
-            if (d.mesh.visual) {
-              dummyHitTargets.push(d.mesh.visual);
-            }
           }
         }
 
         const hitTargets = [...enemyHitTargets, ...dummyHitTargets, ...sceneCollidables];
-        const intersects = raycaster.intersectObjects(hitTargets, true);
+        let intersects = raycaster.intersectObjects(hitTargets, true);
+
+        // 第二階段：只針對「被命中的那一隻」做高模精準判定，讓彈孔/血跡貼在真實模型表面上
+        if (intersects.length > 0) {
+          const coarse = intersects[0];
+          let owner = coarse.object;
+          while (owner && owner.userData.enemyId === undefined && owner.userData.dummyId === undefined && owner.parent) {
+            owner = owner.parent;
+          }
+          if (owner && (owner.userData.enemyId !== undefined || owner.userData.dummyId !== undefined)) {
+            const ent = owner.userData.enemyId !== undefined
+              ? enemyManager.enemies.find(e => e.id === owner.userData.enemyId)
+              : trainingDummyManager.dummies.find(d => d.id === owner.userData.dummyId);
+            if (ent && ent.mesh && ent.mesh.visual) {
+              const fine = raycaster.intersectObject(ent.mesh.visual, true);
+              if (fine.length > 0 && fine[0].distance <= coarse.distance + 1.2) {
+                intersects = [fine[0]];
+              }
+            }
+          }
+        }
 
         if (intersects.length > 0) {
           const hit = intersects[0];
@@ -9482,6 +9846,7 @@
           // Spawn High-Velocity 3D Bullet Flying toward target and penetrating
           spawnBullet(muzzleWorld, hitPoint, {
             isEnemy: false,
+            fromPlayer: true,
             type: config.isEnergy ? 'blaster' : 'rifle',
             colorHex: config.muzzleColor,
             hitData
@@ -9493,6 +9858,7 @@
           }
           spawnBullet(muzzleWorld, farPoint, {
             isEnemy: false,
+            fromPlayer: true,
             type: config.isEnergy ? 'blaster' : 'rifle',
             colorHex: config.muzzleColor
           });
@@ -10193,6 +10559,10 @@
 
         // Update Thick Straight Laser Trajectory Guide
         updateTrajectoryGuide();
+
+        // PERF: move pooled street PointLights to nearest lamps & distance-based shadow LOD
+        updateStreetLightPool(playerController.position);
+        updateCharacterShadowLOD(playerController.position);
       }
 
       // Render 2D Fruit Ninja Slashes Canvas
@@ -10262,6 +10632,9 @@
       skyDome.position.copy(camera.position);
 
       renderer.render(scene, camera);
+
+      // 2D screen-space bullet & tracer overlay (shooting_range style, drawn on top of the 3D scene)
+      renderBulletOverlay(delta);
     }
 
     gameLoop();
