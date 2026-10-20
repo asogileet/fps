@@ -994,6 +994,37 @@
       line-height: 1.3;
     }
 
+    /* Enemy Count Selection Grid */
+    .count-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+    .count-btn {
+      background: rgba(14, 25, 38, 0.9);
+      border: 2px solid rgba(255, 255, 255, 0.12);
+      border-radius: 6px;
+      padding: 12px 6px;
+      cursor: pointer;
+      color: #fff;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    .count-btn:hover {
+      border-color: #00ffaa;
+      background: rgba(0, 255, 170, 0.12);
+      transform: translateY(-2px);
+    }
+    .count-btn.active {
+      border-color: #00ffaa;
+      background: rgba(0, 255, 170, 0.22);
+      box-shadow: 0 0 16px rgba(0, 255, 170, 0.35);
+    }
+
     /* Enemy 3D Model Selection - Streamlined to 4 clean slots */
     .enemy-model-grid {
       display: grid;
@@ -1647,9 +1678,12 @@
         margin: 8px 0 4px 2px;
         font-size: 10px;
       }
-      .diff-grid, .mode-select-grid, .time-grid {
+      .diff-grid, .mode-select-grid, .time-grid, .count-grid {
         gap: 6px;
         margin-bottom: 10px;
+      }
+      .count-btn {
+        padding: 6px 3px;
       }
       .mode-select-btn {
         padding: 8px 12px;
@@ -1988,6 +2022,30 @@
           </button>
         </div>
 
+        <div class="section-label">敵軍規模 // ENEMY SQUAD SIZE (自選場上敵軍 / 人偶數量)</div>
+        <div class="count-grid" id="start-count-grid">
+          <button class="count-btn" data-count="8">
+            <span class="diff-name" style="color:#00ffaa">8 隻</span>
+            <span class="diff-desc">極速流暢<br>輕量設備</span>
+          </button>
+          <button class="count-btn" data-count="16">
+            <span class="diff-name" style="color:#33bbff">16 隻</span>
+            <span class="diff-desc">標準戰術<br>經典節奏</span>
+          </button>
+          <button class="count-btn active" data-count="24">
+            <span class="diff-name" style="color:#ffcc00">24 隻</span>
+            <span class="diff-desc">推薦激戰<br>巷戰縱深</span>
+          </button>
+          <button class="count-btn" data-count="32">
+            <span class="diff-name" style="color:#ff7733">32 隻</span>
+            <span class="diff-desc">重度交火<br>層層壓迫</span>
+          </button>
+          <button class="count-btn" data-count="48">
+            <span class="diff-name" style="color:#ff3355">48 隻</span>
+            <span class="diff-desc">大軍壓境<br>槍林彈雨</span>
+          </button>
+        </div>
+
         <div class="section-label">天候時間 // TIME OF DAY</div>
         <div class="time-grid">
           <button class="time-btn active" data-time="noon">
@@ -2086,6 +2144,15 @@
           <button class="diff-btn pause-diff active" data-mode="normal"><span class="diff-name" style="color:#33aaff">普通</span></button>
           <button class="diff-btn pause-diff" data-mode="hard"><span class="diff-name" style="color:#ff4444">困難</span></button>
           <button class="diff-btn pause-diff god" data-mode="god"><span class="diff-name" style="color:#ffd700">無敵</span></button>
+        </div>
+
+        <div class="section-label">調整敵軍規模 // ENEMY SQUAD SIZE</div>
+        <div class="count-grid" id="pause-count-grid" style="margin-bottom:14px;">
+          <button class="count-btn pause-count" data-count="8"><span class="diff-name" style="color:#00ffaa">8 隻</span></button>
+          <button class="count-btn pause-count" data-count="16"><span class="diff-name" style="color:#33bbff">16 隻</span></button>
+          <button class="count-btn pause-count active" data-count="24"><span class="diff-name" style="color:#ffcc00">24 隻</span></button>
+          <button class="count-btn pause-count" data-count="32"><span class="diff-name" style="color:#ff7733">32 隻</span></button>
+          <button class="count-btn pause-count" data-count="48"><span class="diff-name" style="color:#ff3355">48 隻</span></button>
         </div>
 
         <div class="section-label">調整天候 // TIME OF DAY</div>
@@ -2978,6 +3045,7 @@
     };
     let currentDifficulty = 'normal';
     let currentGameMode = 'combat'; // 'combat', 'zombie', or 'practice'
+    let selectedEnemyCount = 24; // 玩家自選敵人規模 (8, 16, 24, 32, 48)
     let practiceTargetsHit = 0;
     let practiceTargetsSliced = 0;
     let zombieKills = 0;
@@ -4313,21 +4381,36 @@
     const bulletMeshPool = [];
     const activeFlyingBullets = [];
 
-    // Shared Geometries & Materials for high-performance visible 3D Bullets
-    // 放大彈頭體積 (半徑由 0.032m 增至 0.095m)，長度 0.65m，確保在 65° 一般腰射視野下清晰奪目
-    const bulletHeadGeo = new THREE.CylinderGeometry(0.095, 0.095, 0.65, 8);
+    // Procedural soft-radial circular glow texture (完全圓形柔和發光，絕無方形生硬邊緣)
+    function createBulletGlowTexture() {
+      const cvs = document.createElement('canvas');
+      cvs.width = 128;
+      cvs.height = 128;
+      const ctx = cvs.getContext('2d');
+      const grad = ctx.createRadialGradient(64, 64, 0, 64, 64, 62);
+      grad.addColorStop(0, 'rgba(255, 255, 255, 1)');
+      grad.addColorStop(0.25, 'rgba(255, 225, 160, 0.95)');
+      grad.addColorStop(0.55, 'rgba(255, 110, 30, 0.45)');
+      grad.addColorStop(0.85, 'rgba(255, 40, 10, 0.12)');
+      grad.addColorStop(1, 'rgba(255, 30, 0, 0)');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, 128, 128);
+      const tex = new THREE.CanvasTexture(cvs);
+      return tex;
+    }
+    const bulletGlowTexture = createBulletGlowTexture();
+
+    // 16-segment smooth geometries so bullets are sleek and rounded from every angle (告別方形多邊形生硬邊角)
+    const bulletHeadGeo = new THREE.CylinderGeometry(0.08, 0.08, 0.65, 16);
     bulletHeadGeo.rotateX(Math.PI / 2); // Align with Z axis
-    const bulletTipGeo = new THREE.SphereGeometry(0.095, 8, 8);
+    const bulletTipGeo = new THREE.SphereGeometry(0.08, 16, 12);
     bulletTipGeo.translate(0, 0, -0.325); // Position at front tip
-    const bulletMachConeGeo = new THREE.ConeGeometry(0.24, 0.95, 8);
+    const bulletMachConeGeo = new THREE.ConeGeometry(0.20, 0.95, 16);
     bulletMachConeGeo.rotateX(-Math.PI / 2);
     bulletMachConeGeo.translate(0, 0, 0.25); // Extends behind head
-    const bulletTrailGeo = new THREE.CylinderGeometry(0.045, 0.16, 4.6, 8);
+    const bulletTrailGeo = new THREE.CylinderGeometry(0.025, 0.14, 4.2, 16);
     bulletTrailGeo.rotateX(Math.PI / 2);
-    bulletTrailGeo.translate(0, 0, 2.4); // Trails behind bullet
-
-    // Camera-facing cross-billboard planes so bullet flare stays intensely thick from ANY viewing angle
-    const bulletFlareGeo = new THREE.PlaneGeometry(0.48, 0.48);
+    bulletTrailGeo.translate(0, 0, 2.2); // Trails behind bullet
 
     for (let i = 0; i < MAX_FLYING_BULLETS; i++) {
       const bGroup = new THREE.Group();
@@ -4361,13 +4444,31 @@
       const machMesh = new THREE.Mesh(bulletMachConeGeo, machMat);
       const trailMesh = new THREE.Mesh(bulletTrailGeo, glowMat);
 
-      // Add camera-facing cross-flare blades (十字發光曳光翼)
-      const flare1 = new THREE.Mesh(bulletFlareGeo, glowMat);
-      const flare2 = new THREE.Mesh(bulletFlareGeo, glowMat);
-      flare2.rotation.z = Math.PI / 2;
-      bGroup.add(flare1);
-      bGroup.add(flare2);
+      // Camera-facing round glowing Sprite at the bullet tip (永恆面對鏡頭的純圓形發光球體，徹底消除正方形感)
+      const spriteMat = new THREE.SpriteMaterial({
+        map: bulletGlowTexture,
+        color: 0xffaa22,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+        transparent: true
+      });
+      const tipSprite = new THREE.Sprite(spriteMat);
+      tipSprite.scale.set(0.65, 0.65, 0.65);
+      tipSprite.position.set(0, 0, -0.32);
 
+      const trailSpriteMat = new THREE.SpriteMaterial({
+        map: bulletGlowTexture,
+        color: 0xff7711,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+        transparent: true
+      });
+      const trailSprite = new THREE.Sprite(trailSpriteMat);
+      trailSprite.scale.set(0.55, 0.55, 0.55);
+      trailSprite.position.set(0, 0, 1.2);
+
+      bGroup.add(tipSprite);
+      bGroup.add(trailSprite);
       bGroup.add(headMesh);
       bGroup.add(tipMesh);
       bGroup.add(machMesh);
@@ -4382,8 +4483,10 @@
         tipMesh,
         machMesh,
         trailMesh,
-        flare1,
-        flare2,
+        tipSprite,
+        trailSprite,
+        spriteMat,
+        trailSpriteMat,
         coreMat,
         glowMat,
         machMat,
@@ -4440,6 +4543,8 @@
 
       bItem.glowMat.color.setHex(colorHex);
       bItem.machMat.color.setHex(machHex);
+      if (bItem.tipSprite) bItem.tipSprite.material.color.setHex(isEnemy ? 0xff2211 : colorHex);
+      if (bItem.trailSprite) bItem.trailSprite.material.color.setHex(isEnemy ? 0xff4411 : colorHex);
 
       // Player rifle bullets: drawn by the 2D screen-space overlay exactly like shooting_range
       // (3D bullet mesh hidden; it still flies invisibly so the impact timing stays in sync with the overlay).
@@ -6894,13 +6999,8 @@
           -612, -635, -660, -685, -708, -728  // Sector Echo (-600 ~ -750m)
         ];
         const diff = DIFFICULTIES[currentDifficulty];
-        let finalCount = count || diff.enemyCount || 24;
-        const isGlbActive = (currentEnemyModelType !== 'soldier' && currentEnemyModelType !== 'dummy') && !!cachedGlbData;
-        if (isGlbActive) {
-          finalCount = Math.min(finalCount, currentGameMode === 'zombie' ? 10 : 8);
-        } else if (currentGameMode === 'zombie') {
-          finalCount = Math.min(finalCount, 18);
-        }
+        // 優先尊重玩家在選單選擇的敵人規模 (selectedEnemyCount)
+        let finalCount = count || selectedEnemyCount || diff.enemyCount || 24;
 
         const pPos = (typeof playerController !== 'undefined' && playerController) ? playerController.position : new THREE.Vector3(0, 0, 5);
 
@@ -10170,8 +10270,7 @@
       } else {
         trainingDummyManager.clearAll();
         friendlySquad.clearAll(); // Ensure lone-wolf combat, no squadmates auto-firing/stealing kills
-        const diff = DIFFICULTIES[currentDifficulty];
-        const spawnCount = (currentGameMode === 'zombie') ? Math.max(18, diff.enemyCount || 20) : (diff.enemyCount || 24);
+        const spawnCount = selectedEnemyCount;
         enemyManager.spawnSectorEnemies(spawnCount);
       }
 
@@ -10284,8 +10383,7 @@
             zombieKills = 0;
             playerController.reset(currentDifficulty);
           }
-          const diff = DIFFICULTIES[currentDifficulty];
-          const spawnCount = (currentGameMode === 'zombie') ? Math.max(18, diff.enemyCount || 20) : (diff.enemyCount || 24);
+          const spawnCount = selectedEnemyCount;
           enemyManager.spawnSectorEnemies(spawnCount);
         }
         updateHUD();
@@ -10368,16 +10466,16 @@
 
       if (mode === 'dummy') {
         showPickupToast('🎯 3D 外觀已切換為：戰術標靶假人');
-        refreshActiveTargets(16);
+        refreshActiveTargets(selectedEnemyCount);
       } else if (mode === 'soldier') {
         showPickupToast('🪖 3D 外觀已切換為：戰術特戰士兵');
-        refreshActiveTargets(24);
+        refreshActiveTargets(selectedEnemyCount);
       } else if (mode === 'assets') {
         const item = ASSET_MODELS[currentAssetModelKey] || ASSET_MODELS['r18'];
         if (modelCache[currentAssetModelKey]) {
           cachedGlbData = modelCache[currentAssetModelKey];
           showPickupToast('💃 3D 外觀已切換為：' + cachedGlbData.name);
-          refreshActiveTargets(8);
+          refreshActiveTargets(selectedEnemyCount);
         } else {
           loadGlbEnemyModel(item.path, item.name, currentAssetModelKey, null, item.isVrm);
         }
@@ -10428,6 +10526,45 @@
         loadGlbEnemyModel(blobUrl, displayName, 'custom', null, isVrmFile);
       });
     }
+
+    // Enemy Squad Size Selection Buttons (both Start and Pause modals)
+    function setEnemySquadSize(count, showToast = false) {
+      selectedEnemyCount = parseInt(count, 10) || 24;
+      try { localStorage.setItem('fps_enemy_count', selectedEnemyCount); } catch (e) {}
+      document.querySelectorAll('.count-btn[data-count]').forEach(btn => {
+        if (parseInt(btn.getAttribute('data-count'), 10) === selectedEnemyCount) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      });
+      if (showToast) {
+        showPickupToast(`👥 敵軍規模已切換為：${selectedEnemyCount} 隻！`, 'ammo');
+      }
+      if (gameState === 'PLAYING' || gameState === 'PAUSED') {
+        if (currentGameMode === 'practice' && typeof trainingDummyManager !== 'undefined') {
+          trainingDummyManager.spawnDummies();
+        } else if (enemyManager) {
+          enemyManager.spawnSectorEnemies(selectedEnemyCount);
+        }
+      }
+    }
+
+    document.querySelectorAll('.count-btn[data-count]').forEach(btn => {
+      const selectCount = (e) => {
+        if (e && e.cancelable && e.type === 'touchend') e.preventDefault();
+        const cnt = btn.getAttribute('data-count');
+        setEnemySquadSize(cnt, true);
+      };
+      btn.addEventListener('click', selectCount);
+      btn.addEventListener('touchend', selectCount, { passive: false });
+    });
+
+    // Restore saved enemy count if present
+    try {
+      const savedCount = localStorage.getItem('fps_enemy_count');
+      if (savedCount) setEnemySquadSize(savedCount, false);
+    } catch (e) {}
 
     // Auto-initialize selected enemy model & 180° flip button state
     syncFlipButtonsUI();
